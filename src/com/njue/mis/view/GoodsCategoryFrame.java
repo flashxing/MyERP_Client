@@ -25,6 +25,10 @@ import com.njue.mis.model.GoodsCategory;
 
 public class GoodsCategoryFrame extends CategoryFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1446389238639775488L;
 	public GoodsCategoryFrame(List<Category> list)
 	{
 		super("商品管理",list);
@@ -44,7 +48,7 @@ public class GoodsCategoryFrame extends CategoryFrame
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
-				if((clickNode != null)&&(!clickNode.isLeaf())){
+				if((clickNode != null)&&(!clickNode.isLeaf())||(selected == null)){
 					CommonUtil.showError("请选择一个分类再添加商品");
 					return;
 				}
@@ -66,11 +70,14 @@ public class GoodsCategoryFrame extends CategoryFrame
                 if( parentPath != null ){
                     parentNode = (DefaultMutableTreeNode)parentPath.getLastPathComponent();
                     selected = (Category) parentNode.getUserObject();
-                    toAdd.setPrefer_id(selected.getCate_id());
+                }else{
+                	selected = new Category();
+                	selected.setCate_id(0);
                 }
+                toAdd.setPrefer_id(selected.getCate_id());
                 try {
     				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
-    				if (categoryService.categoryHasGoods(toAdd.getCate_id())){
+    				if (categoryService.categoryHasGoods(selected.getCate_id())){
     					CommonUtil.showError("不能在该分类下添加子分类，该分类下有商品存在");
     					return;
     				}

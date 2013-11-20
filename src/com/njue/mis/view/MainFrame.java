@@ -142,21 +142,21 @@ public class MainFrame extends JFrame
 		menuItem = new JMenuItem("库存盘点");
 		menuItem.addActionListener(MainAction.storeHouseInfor());
 		menu.add(menuItem);
-		menuItem = new JMenuItem("价格调整");
-		menuItem.addActionListener(MainAction.priceChange());
-		menu.add(menuItem);
+//		menuItem = new JMenuItem("价格调整");
+//		menuItem.addActionListener(MainAction.priceChange());
+//		menu.add(menuItem);
 		//todo  add the actionListener
 		menuItem = new JMenuItem("库存获赠");
-		menuItem.addActionListener(MainAction.priceChange());
+		menuItem.addActionListener(MainAction.giftIn());
 		menu.add(menuItem);
 		menuItem = new JMenuItem("库存赠送");
-		menuItem.addActionListener(MainAction.priceChange());
+		menuItem.addActionListener(MainAction.giftOut());
 		menu.add(menuItem);
 		menuItem = new JMenuItem("库存报溢");
-		menuItem.addActionListener(MainAction.priceChange());
+		menuItem.addActionListener(MainAction.inCome());
 		menu.add(menuItem);
 		menuItem = new JMenuItem("库存报损");
-		menuItem.addActionListener(MainAction.priceChange());
+		menuItem.addActionListener(MainAction.outCome());
 		menu.add(menuItem);
 		menuItem = new JMenuItem("库存拆装");
 		menuItem.addActionListener(MainAction.priceChange());

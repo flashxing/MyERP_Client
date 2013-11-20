@@ -28,6 +28,10 @@ import com.njue.mis.model.Customer;
 
 public class CustomerFrame extends JInternalFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7882617475364442771L;
 	private CustomerControllerInterface customerService;
 	JTextField custoField;
 	JTextField customer_addressField;
@@ -87,7 +91,7 @@ public class CustomerFrame extends JInternalFrame
 		/*
 		 * 建立客户添加信息页面
 		 */
-		custoField = new JTextField(30);
+		custoField = new JTextField(11);
 		customer_addressField = new JTextField(30);
 		simple_custoField = new JTextField(11);
 		customer_zipField = new JTextField(11);
@@ -101,22 +105,22 @@ public class CustomerFrame extends JInternalFrame
 		JPanel addPanel = new JPanel();
 
 		JPanel addpanel1 = new JPanel();
-		JLabel custoLabel = new JLabel("客户全称:");
+		JLabel custoLabel = new JLabel("客户全称*:");
 		addpanel1.add(custoLabel);
 
 		addpanel1.add(custoField);
 
 		JPanel addpanel2 = new JPanel();
-		JLabel customer_addressLabel = new JLabel("客户地址:");
-		addpanel2.add(customer_addressLabel);
+		JLabel simple_custoLabel= new JLabel("客户编号*:");
+		addpanel2.add(simple_custoLabel);
 
-		addpanel2.add(customer_addressField);
+		addpanel2.add(simple_custoField);
 
 		JPanel addpanel3 = new JPanel();
-		JLabel simple_custoLabel = new JLabel("客户编号:");
-		addpanel3.add(simple_custoLabel);
+		JLabel customer_addressLabel = new JLabel("客户地址:");
+		addpanel3.add(customer_addressLabel);
 
-		addpanel3.add(simple_custoField);
+		addpanel3.add(customer_addressField);
 		JLabel customer_zipLabel = new JLabel("邮政编码:      ");
 		addpanel3.add(customer_zipLabel);
 
@@ -208,7 +212,7 @@ public class CustomerFrame extends JInternalFrame
 									.getText(), customer_linkpField.getText(),
 							customer_linktField.getText(), customer_mailField
 									.getText(), customer_bankField.getText(),
-							customer_bankIDField.getText(),cateId)) != null)
+							customer_bankIDField.getText(),1,cateId)) != null)
 					{
 						JOptionPane.showMessageDialog(null, "客户信息添加成功！", "消息",
 								JOptionPane.INFORMATION_MESSAGE);

@@ -50,7 +50,7 @@ public abstract class Person implements Serializable
 	public Person(String id, String name, String zip, String address,
 			String telephone, String fax, String connectionPerson,
 			String phone, String email, String bank, String account,
-			int available)
+			int available, int cateId)
 	{
 		super();
 		this.id = id;
@@ -65,6 +65,7 @@ public abstract class Person implements Serializable
 		this.bank = bank;
 		this.account = account;
 		this.available = available;
+		this.cateId = cateId;
 	}
 	
 	public void update(Person person){

@@ -2,25 +2,20 @@ package com.njue.mis.view;
 
 
 import java.awt.Dimension;
-import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.MalformedURLException;
-import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,25 +26,24 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 
 import com.njue.mis.client.Configure;
-import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.DiscountControllerInterface;
 import com.njue.mis.interfaces.GoodsControllerInterface;
-import com.njue.mis.interfaces.PortInControllerInterface;
-import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.Discount;
 import com.njue.mis.model.Goods;
-import com.njue.mis.model.PortIn;
-import com.njue.mis.model.StoreHouse;
 
 
 public class DiscountFrame extends JInternalFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4783529949458927656L;
+
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	
 	private JTextField customerNameField;
@@ -234,12 +228,7 @@ public class DiscountFrame extends JInternalFrame
 //		discountField.setEnabled(false);
 //		goodsField.setEnabled(false);
 	}
-	//设置部分控件为可用状态
-	private void setEnableTrue()
-	{
-		goodsNameField.setEnabled(true);
-		discountField.setEnabled(true);
-	}
+
 	private void clearTextField()
 	{
 		goodsDiscountField.setText("");

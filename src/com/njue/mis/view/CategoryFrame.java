@@ -26,6 +26,10 @@ import com.njue.mis.model.Category;
 
 public class CategoryFrame extends JInternalFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7608328935392470145L;
 	protected List<Category> list = new ArrayList<Category>();
 	protected JScrollPane scrollPane;
     protected JTree simpleTree;
@@ -61,11 +65,11 @@ public class CategoryFrame extends JInternalFrame
 		root = buildTree(list);
         simpleTree = new JTree(root);
         simpleTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        simpleTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener(){
-            public void valueChanged( TreeSelectionEvent e ){
-                System.out.println( "selection changed" );
-            }
-        });
+//        simpleTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener(){
+//            public void valueChanged( TreeSelectionEvent e ){
+//                System.out.println( "selection changed" );
+//            }
+//        });
         simpleTree.setRootVisible(false);
         simpleTree.setShowsRootHandles(true);
 //        simpleTree.putClientProperty("JTree.lineStyle","Horizontal");

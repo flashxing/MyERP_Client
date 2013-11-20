@@ -46,7 +46,7 @@ public class LoginFrame extends JFrame implements ActionListener
 		this.setBounds(screenSize.width / 3, screenSize.height / 3, 330, 230);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		
 		submit = new JButton("È·¶¨");
 		submit.addActionListener(this);
 
@@ -130,6 +130,8 @@ public class LoginFrame extends JFrame implements ActionListener
 		password = new JPasswordField();
 		password.setColumns(10);
 		password.setEchoChar('*');
+		username.setText("test");
+		password.setText("123456");
 		panel_center = new JPanel();
 		panel_center.setLayout(new GridLayout(3, 1));
 		panel_south = new JPanel();

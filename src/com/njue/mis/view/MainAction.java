@@ -10,7 +10,6 @@ import java.util.List;
 
 import com.njue.mis.client.Configure;
 import com.njue.mis.interfaces.CategoryControllerInterface;
-import com.njue.mis.interfaces.OperatorControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Category;
 import com.njue.mis.model.StoreHouse;
@@ -368,6 +367,66 @@ public class MainAction
 				MainFrame.getMainFrame().getContentPane().add(
 						changePasswordFrame);
 				changePasswordFrame.setVisible(true);
+			}
+		};
+	}
+
+	public static ActionListener outCome() {
+		// TODO Auto-generated method stub
+		return new ActionListener()
+		{
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				OutComeFrame outComeFrame = new OutComeFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						outComeFrame);
+				outComeFrame.setVisible(true);
+			}
+		};
+	}
+
+	public static ActionListener inCome() {
+		// TODO Auto-generated method stub
+		return new ActionListener()
+		{
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				InComeFrame inComeFrame = new InComeFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						inComeFrame);
+				inComeFrame.setVisible(true);
+			}
+		};
+	}
+
+	public static ActionListener giftIn() {
+		// TODO Auto-generated method stub
+		return new ActionListener()
+		{
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				GiftInFrame giftInFrame = new GiftInFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						giftInFrame);
+				giftInFrame.setVisible(true);
+			}
+		};
+	}
+	
+	public static ActionListener giftOut() {
+		// TODO Auto-generated method stub
+		return new ActionListener()
+		{
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				GiftOutFrame giftOutFrame = new GiftOutFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						giftOutFrame);
+				giftOutFrame.setVisible(true);
 			}
 		};
 	}

@@ -24,10 +24,10 @@ public class Customer extends Person
 	public Customer(String id, String name, String zip, String address,
 			String telephone, String fax, String connectionPerson,
 			String phone, String email, String bank, String account,
-			int available)
+			int available,int cateId)
 	{
 		super(id, name, zip, address, telephone, fax, connectionPerson, phone, email,
-				bank, account, available);
+				bank, account, available, cateId);
 		// TODO Auto-generated constructor stub
 	}
 	

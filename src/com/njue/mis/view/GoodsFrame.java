@@ -18,16 +18,17 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import com.njue.mis.client.Configure;
-import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.ValidationManager;
-import com.njue.mis.interfaces.CategoryControllerInterface;
 import com.njue.mis.interfaces.GoodsControllerInterface;
-import com.njue.mis.interfaces.ProviderServicesHandler;
 import com.njue.mis.model.Goods;
 
 public class GoodsFrame extends JInternalFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4098319526497060005L;
 	JTextField goodsField;
 	JTextField ID_goodsField;
 	JTextField priceField;
@@ -273,21 +274,21 @@ public class GoodsFrame extends JInternalFrame
 
 				else
 				{
-					try {
-	    				GoodsControllerInterface goodsService = (GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
-	    			} catch (MalformedURLException e1) {
-	    				// TODO Auto-generated catch block
-	    				e1.printStackTrace();
-	    				CommonUtil.showError("网络连接错误");
-	    			} catch (RemoteException e1) {
-	    				// TODO Auto-generated catch block
-	    				e1.printStackTrace();
-	    				CommonUtil.showError("网络连接错误");
-	    			} catch (NotBoundException e1) {
-	    				// TODO Auto-generated catch block
-	    				e1.printStackTrace();
-	    				CommonUtil.showError("网络连接错误");
-	    			}
+//					try {
+//	    				GoodsControllerInterface goodsService = (GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
+//	    			} catch (MalformedURLException e1) {
+//	    				// TODO Auto-generated catch block
+//	    				e1.printStackTrace();
+//	    				CommonUtil.showError("网络连接错误");
+//	    			} catch (RemoteException e1) {
+//	    				// TODO Auto-generated catch block
+//	    				e1.printStackTrace();
+//	    				CommonUtil.showError("网络连接错误");
+//	    			} catch (NotBoundException e1) {
+//	    				// TODO Auto-generated catch block
+//	    				e1.printStackTrace();
+//	    				CommonUtil.showError("网络连接错误");
+//	    			}
 				}
 			}
 		});

@@ -1,12 +1,5 @@
 package com.njue.mis.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -15,51 +8,27 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 import com.njue.mis.client.Configure;
-import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.CategoryControllerInterface;
 import com.njue.mis.interfaces.CustomerControllerInterface;
-import com.njue.mis.interfaces.GoodsControllerInterface;
-import com.njue.mis.interfaces.OperatorControllerInterface;
 import com.njue.mis.model.Category;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.CustomerCategory;
-import com.njue.mis.model.Goods;
-import com.njue.mis.model.GoodsCategory;
-import com.njue.mis.view.GoodsCategoryFrame.ClickNodeActionListener;
-import com.njue.mis.view.GoodsCategoryFrame.DeleteActionListener;
-import com.njue.mis.view.GoodsCategoryFrame.UpdateActionListener;
 
 public class CustomerCategoryFrame extends CategoryFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6208433914029145693L;
 	public CustomerCategoryFrame(List<Category> list)
 	{
 		super("客户管理",list);
@@ -74,13 +43,14 @@ public class CustomerCategoryFrame extends CategoryFrame
 				"id","name"
 		};
 		super.init(list);
+		addGoodsButton.setText("添加客户");
 		addGoodsButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
-				if((clickNode != null)&&(!clickNode.isLeaf())){
-					CommonUtil.showError("请选择一个分类再添加商品");
+				if((clickNode != null)&&(!clickNode.isLeaf())||(selected==null)){
+					CommonUtil.showError("请选择一个分类再添加客户");
 					return;
 				}
 				CustomerFrame customerFrame = new CustomerFrame(selected.getCate_id());
@@ -101,11 +71,14 @@ public class CustomerCategoryFrame extends CategoryFrame
                 if( parentPath != null ){
                     parentNode = (DefaultMutableTreeNode)parentPath.getLastPathComponent();
                     selected = (CustomerCategory) parentNode.getUserObject();
-                    toAdd.setPrefer_id(selected.getCate_id());
+                }else{
+                	selected = new Category();
+                	selected.setCate_id(0);
                 }
+                toAdd.setPrefer_id(selected.getCate_id());
                 try {
     				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
-    				if (categoryService.categoryHasGoods(toAdd.getCate_id())){
+    				if (categoryService.categoryHasCustomer(selected.getCate_id())){
     					CommonUtil.showError("不能在该分类下添加子类，该分类下存在客户");
     					return;
     				}
@@ -150,7 +123,7 @@ public class CustomerCategoryFrame extends CategoryFrame
             try {
 				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
 				if (categoryService.categoryHasGoods(toDelete.getCate_id())){
-					CommonUtil.showError("不能删除该分类,该分类还有商品存在");
+					CommonUtil.showError("不能删除该分类,该分类还有客户存在");
 					return;
 				}
 				categoryService.delCategory(toDelete);
@@ -232,7 +205,6 @@ public class CustomerCategoryFrame extends CategoryFrame
 					CustomerControllerInterface customerService = (CustomerControllerInterface) Naming.lookup(Configure.CustomerController);
 					Vector<Customer> customerList = customerService.getAllCustomerByCateId(cateId);
 					if(customerList != null){
-						System.out.println(customerList.toArray()[0].getClass());
 						CommonUtil.updateJTable(table, objects, customerList.toArray(), fieldsToShow);
 					}
 					table.repaint();

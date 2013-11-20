@@ -1,6 +1,6 @@
 package com.njue.mis.model;
 
-public class GiftIn extends Gift{
+public class GiftIn extends StockInObject{
 
 	/**
 	 * 

@@ -2,14 +2,12 @@ package com.njue.mis.view;
 
 
 import java.awt.Dimension;
-import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.MalformedURLException;
-import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -32,28 +30,28 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 
 import com.njue.mis.client.Configure;
-import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.DiscountControllerInterface;
 import com.njue.mis.interfaces.GoodsControllerInterface;
-import com.njue.mis.interfaces.PortInControllerInterface;
 import com.njue.mis.interfaces.SalesControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.Discount;
 import com.njue.mis.model.Goods;
-import com.njue.mis.model.PortIn;
-import com.njue.mis.model.Sales;
 import com.njue.mis.model.SalesIn;
 import com.njue.mis.model.StoreHouse;
 
 
 public class SalesFrame extends JInternalFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4373144987548153299L;
+
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	
 	private JTextField customerNameField;
@@ -71,7 +69,7 @@ public class SalesFrame extends JInternalFrame
 	private List<Customer> customerList = new ArrayList<Customer>();
 	private JTable customerTable;
 	private JScrollPane customerScrollPane;
-	private JComboBox storeHouseComboBox;
+	private JComboBox<StoreHouse> storeHouseComboBox;
 	
 	private Vector<Goods> goodsVec;
 
@@ -84,7 +82,6 @@ public class SalesFrame extends JInternalFrame
 	
 	private Customer selectedCustomer;
 	private Goods selectedGoods;
-	private StoreHouse selectedSH;
 	private List<StoreHouse> storeHouseList;
 	
 	private GoodsControllerInterface goodsHandler;
@@ -143,7 +140,10 @@ public class SalesFrame extends JInternalFrame
 		priceField = new JTextField(10);
 		JLabel shLabel = new JLabel("仓库");
 		storeHouseComboBox = new JComboBox<StoreHouse>();
-		storeHouseComboBox.setModel(new javax.swing.DefaultComboBoxModel(storeHouseList.toArray()));
+		storeHouseComboBox.setModel(new javax.swing.DefaultComboBoxModel<StoreHouse>());
+		for(StoreHouse sh:storeHouseList){
+			storeHouseComboBox.addItem(sh);
+		}
 		panel5.add(salesIdlable);
 		panel5.add(salesIdField);
 		panel5.add(priceLabel);
@@ -301,11 +301,7 @@ public class SalesFrame extends JInternalFrame
 //		discountField.setEnabled(false);
 //		goodsField.setEnabled(false);
 	}
-	//设置部分控件为可用状态
-	private void setEnableTrue()
-	{
-		goodsNameField.setEnabled(true);
-	}
+
 	private void clearTextField()
 	{
 		goodsDiscountField.setText("");
@@ -382,33 +378,6 @@ public class SalesFrame extends JInternalFrame
 			
 		}
 		
-	}
-	private class GoodsDiscountUpdateListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			if(discount == null || selectedGoods == null){
-				CommonUtil.showError("请选选择要更新折扣的用户和商品");
-				return;
-			}
-			double value=1;
-			try{
-				value = Double.parseDouble(goodsDiscountField.getText());
-			}catch(Exception ex){
-				CommonUtil.showError("折扣必须为数字");
-				return;
-			}
-			if(value>1||value<0){
-				CommonUtil.showError("折扣应在0到1之间");
-				return;
-			}
-			discount.getGoodsDiscount().put(selectedGoods.getId(), value);
-			try {
-				discountHandler.updateDiscount(discount);
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				CommonUtil.showError("网络错误，更新失败");
-			}
-		}
 	}
 	
 	private class SalesAddListener implements ActionListener{

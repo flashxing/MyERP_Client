@@ -19,4 +19,6 @@ public interface StockControllerInterface extends Remote{
 	
 	public Stock getStock(int id) throws RemoteException;
 	
+	public Stock getStock(int shId, String goodsId) throws RemoteException;
+	
 }

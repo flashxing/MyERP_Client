@@ -1,12 +1,7 @@
 package com.njue.mis.model;
 
-public class GiftOut extends StockOutObject{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4412945858824245418L;
-	public GiftOut(String id, String receiver, String goodsId, int storeHouseId,
+public class StockOutObject extends StockObject{
+	public StockOutObject(String id, String receiver, String goodsId, int storeHouseId,
 			int number, double price, String time, String operatePerson,
 			String comment)
 	{

@@ -26,7 +26,7 @@ public class Provider extends Person
 			int available)
 	{
 		super(id, name, zip, address, telephone, fax, connectionPerson, phone, email,
-				bank, account, available);
+				bank, account, available,0);
 		// TODO Auto-generated constructor stub
 	}
 

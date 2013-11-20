@@ -33,7 +33,7 @@ import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.GoodsControllerInterface;
-import com.njue.mis.interfaces.PortInControllerInterface;
+import com.njue.mis.interfaces.PortControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Goods;
 import com.njue.mis.model.PortIn;
@@ -52,10 +52,19 @@ public class InportFrame extends JInternalFrame
 	JTextField operaterField;
 	JTextField goodsField;
 	JTextField explainField;
+	private JTextField goodsNameField;
 	private Vector<Goods> goodsVec;
 	private List<StoreHouse> storeHouseList;
 	private double goodsPrices=0;  //记录商品的单价
-	private PortInControllerInterface portInService;
+	private PortControllerInterface portInService;
+
+    protected String[] goodsColumns={"商品编号","商品名称","商品描述"};
+    protected String[] goodsFields={"productCode","goodsName","description"};
+    protected Object[] goodsList = {};
+    private JTable goodsTable;
+	private JScrollPane goodScrollPane;
+	
+	private GoodsControllerInterface handler;
 	
 	public InportFrame()
 	{
@@ -70,11 +79,11 @@ public class InportFrame extends JInternalFrame
 	{
 		//get the goods data and storeHouse data
 		try {
-			GoodsControllerInterface handler=(GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
+			handler =(GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
 			goodsVec = handler.getAllGoods();
 			StoreHouseControllerInterface storeHouseService = (StoreHouseControllerInterface) Naming.lookup(Configure.StoreHouseController);
 			storeHouseList = storeHouseService.getAll();
-			portInService = (PortInControllerInterface) Naming.lookup(Configure.PortInController);
+			portInService = (PortControllerInterface) Naming.lookup(Configure.PortInController);
 		} catch (MalformedURLException | RemoteException | NotBoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -114,26 +123,79 @@ public class InportFrame extends JInternalFrame
 		panel2.add(operaterField);
 		
 		JPanel panel3 = new JPanel();
-		JScrollPane goodScrollPane = new JScrollPane();
+		goodScrollPane = new JScrollPane();
 
-		final JTable goodsTable = new JTable(new MyTableModel());
+		
+		goodsTable = CommonUtil.createTable(goodsColumns,goodsVec.toArray(),goodsFields);
 		//表格行改变时发生的事件
 		goodsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener()
 		{
+			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
 				ListSelectionModel model = (ListSelectionModel)e.getSource();
 				int index = model.getMaxSelectionIndex();
-				goodsField.setText(goodsTable.getValueAt(index, 0).toString());
-				goodsPrices=Double.valueOf(goodsTable.getValueAt(index, 8).toString());
+				if(index>=0 && goodsVec!=null &&index<goodsVec.size()){
+					goodsField.setText(goodsTable.getValueAt(index, 0).toString());
+					goodsPrices=Double.valueOf(goodsTable.getValueAt(index, 8).toString());
+				}
 			}
 		});
 		
 		
 		goodsTable.setPreferredScrollableViewportSize(new Dimension(screenSize.width * 2 / 3-60,
-				screenSize.height  / 3));
+				screenSize.height  / 8));
 		goodScrollPane.setViewportView(goodsTable);
 		panel3.add(goodScrollPane);
+		
+		JPanel panelSearch = new JPanel();
+		JLabel goodsNameLabel = new JLabel("商品名称:");
+		goodsNameField = new JTextField(10);
+		
+		JButton searchButton = new JButton("查询");
+		searchButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				try {
+					String goodsName = goodsNameField.getText();
+//					if(goodsName.length()==0){
+//						JOptionPane.showMessageDialog(null,"请输入查询商品的名称","警告",JOptionPane.WARNING_MESSAGE);
+//						return;
+//					}	
+					goodsVec = handler.getAllGoodsByGoodsName(goodsName);
+					CommonUtil.updateJTable(goodsTable, goodsColumns, goodsVec.toArray(), goodsFields);
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					CommonUtil.showError("网络错误");
+				}
+			}
+		});
+		panelSearch.add(goodsNameLabel);
+		panelSearch.add(goodsNameField);
+		panelSearch.add(searchButton);
+//		JScrollPane goodScrollPane = new JScrollPane();
+//
+//		final JTable goodsTable = new JTable(new MyTableModel());
+//		//表格行改变时发生的事件
+//		goodsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener()
+//		{
+//			public void valueChanged(ListSelectionEvent e)
+//			{
+//				ListSelectionModel model = (ListSelectionModel)e.getSource();
+//				int index = model.getMaxSelectionIndex();
+//				goodsField.setText(goodsTable.getValueAt(index, 0).toString());
+//				goodsPrices=Double.valueOf(goodsTable.getValueAt(index, 8).toString());
+//			}
+//		});
+//		
+//		
+//		goodsTable.setPreferredScrollableViewportSize(new Dimension(screenSize.width * 2 / 3-60,
+//				screenSize.height  / 3));
+//		goodScrollPane.setViewportView(goodsTable);
+//		panel3.add(goodScrollPane);
 		
 		JPanel panel4 = new JPanel();
 		JLabel goodsLabel = new JLabel("商品编号:");
@@ -220,6 +282,7 @@ public class InportFrame extends JInternalFrame
 		panel4.add(inButton);
 		panel.add(panel1);
 		panel.add(panel2);
+		panel.add(panelSearch);
 		panel.add(panel3);
 		panel.add(panel4);
 		return panel;
@@ -246,48 +309,48 @@ public class InportFrame extends JInternalFrame
 	}
 	
 	
-	class MyTableModel extends AbstractTableModel
-	{
-
-		Vector<Goods> goodsVector=goodsVec;
-		
-		private String[] columnNames =
-		{
-				"商品编号", "商品名称", "产地", "规格","包装","生产批号",
-                "批准文号","描述","价格","供应商编号"
-		};
-		
-		public int getColumnCount()
-		{
-			return columnNames.length;
-		}
-
-		public int getRowCount()
-		{
-			return goodsVector.size();
-		}
-
-		public String getColumnName(int col)
-		{
-			return columnNames[col];
-		}
-
-		public Object getValueAt(int row, int col)
-		{
-			Goods goods=goodsVector.get(row);
-			return goods.getGoodsValue(col);
-		}
-
-		@SuppressWarnings("unchecked")
-		public Class getColumnClass(int c)
-		{
-			return getValueAt(0, c).getClass();
-		}
-
-		public boolean isCellEditable(int row, int col)
-		{
-			return false;
-		}		
-	}
+//	class MyTableModel extends AbstractTableModel
+//	{
+//
+//		Vector<Goods> goodsVector=goodsVec;
+//		
+//		private String[] columnNames =
+//		{
+//				"商品编号", "商品名称", "产地", "规格","包装","生产批号",
+//                "批准文号","描述","价格","供应商编号"
+//		};
+//		
+//		public int getColumnCount()
+//		{
+//			return columnNames.length;
+//		}
+//
+//		public int getRowCount()
+//		{
+//			return goodsVector.size();
+//		}
+//
+//		public String getColumnName(int col)
+//		{
+//			return columnNames[col];
+//		}
+//
+//		public Object getValueAt(int row, int col)
+//		{
+//			Goods goods=goodsVector.get(row);
+//			return goods.getGoodsValue(col);
+//		}
+//
+//		@SuppressWarnings("unchecked")
+//		public Class getColumnClass(int c)
+//		{
+//			return getValueAt(0, c).getClass();
+//		}
+//
+//		public boolean isCellEditable(int row, int col)
+//		{
+//			return false;
+//		}		
+//	}
 	
 }

@@ -14,4 +14,6 @@ public class Configure {
 	public final static String RoleController = "rmi://"+IP+"/RoleController";
 	public final static String UserController = "rmi://"+IP+"/UserController";
 	public final static String UserRoleController = "rmi://"+IP+"/UserRoleController";
+	public final static String StockObjectController = "rmi://"+IP+"/StockObjectController";
+	public final static String StockController = "rmi://"+IP+"/StockController";
 }
