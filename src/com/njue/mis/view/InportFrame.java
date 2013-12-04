@@ -55,7 +55,6 @@ public class InportFrame extends JInternalFrame
 	private JTextField goodsNameField;
 	private Vector<Goods> goodsVec;
 	private List<StoreHouse> storeHouseList;
-	private double goodsPrices=0;  //记录商品的单价
 	private PortControllerInterface portInService;
 
     protected String[] goodsColumns={"商品编号","商品名称","商品描述"};
@@ -65,6 +64,8 @@ public class InportFrame extends JInternalFrame
 	private JScrollPane goodScrollPane;
 	
 	private GoodsControllerInterface handler;
+	
+	private Goods selectedGoods;
 	
 	public InportFrame()
 	{
@@ -136,8 +137,8 @@ public class InportFrame extends JInternalFrame
 				ListSelectionModel model = (ListSelectionModel)e.getSource();
 				int index = model.getMaxSelectionIndex();
 				if(index>=0 && goodsVec!=null &&index<goodsVec.size()){
-					goodsField.setText(goodsTable.getValueAt(index, 0).toString());
-					goodsPrices=Double.valueOf(goodsTable.getValueAt(index, 8).toString());
+					selectedGoods = goodsVec.get(index);
+					goodsField.setText(selectedGoods.getProductCode());
 				}
 			}
 		});
@@ -225,12 +226,16 @@ public class InportFrame extends JInternalFrame
 			
 			public void actionPerformed(ActionEvent e)
 			{
+				if(selectedGoods == null){
+					CommonUtil.showError("请先选择一个商品");
+					return;
+				}
 				String inportID=ID_importtextField.getText();
 				String numberStr=numberField.getText();
 				int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
 				String inportTime=importtimeField.getText();
 				String operator=operaterField.getText();
-				String goodsID=goodsField.getText();
+				String goodsID=selectedGoods.getId();
 				String comment=explainField.getText();
 				double goodsPrice = 0;
 				if(numberStr==null||numberStr.trim().length()==0)

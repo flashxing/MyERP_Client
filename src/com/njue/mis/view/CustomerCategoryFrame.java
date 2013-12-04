@@ -1,5 +1,6 @@
 package com.njue.mis.view;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -11,6 +12,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -32,6 +34,8 @@ public class CustomerCategoryFrame extends CategoryFrame
 	public CustomerCategoryFrame(List<Category> list)
 	{
 		super("客户管理",list);
+		image = new ImageIcon("images/customer.png");
+		image.setImage(image.getImage().getScaledInstance(20,20,Image.SCALE_DEFAULT));
 		init(list);
     }
 	public void init(final List<Category> list)
@@ -83,6 +87,7 @@ public class CustomerCategoryFrame extends CategoryFrame
     					return;
     				}
     				toAdd.setCate_id(categoryService.addCategory(toAdd));
+    				insertField.setText("");
     			} catch (MalformedURLException e1) {
     				// TODO Auto-generated catch block
     				e1.printStackTrace();
@@ -152,7 +157,7 @@ public class CustomerCategoryFrame extends CategoryFrame
 		public void actionPerformed(ActionEvent arg0) {
 			// TODO Auto-generated method stub
 			TreePath currentPath = simpleTree.getSelectionPath();
-            if((currentPath == null) || (insertField.getText().length() <1)){
+            if((currentPath == null) || (updateField.getText().length() <1)){
             	CommonUtil.showError("请输入分类名称并选择更新的分类");
             	return;
             }
@@ -160,7 +165,7 @@ public class CustomerCategoryFrame extends CategoryFrame
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode)currentPath.getLastPathComponent();
                 toUpdate = (CustomerCategory) node.getUserObject();
                 String tmpCateName = toUpdate.getCate_name();
-                toUpdate.setCate_name(insertField.getText());
+                toUpdate.setCate_name(updateField.getText());
                 try {
     				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
     				if(!categoryService.updateCategory(toUpdate)){
@@ -196,6 +201,10 @@ public class CustomerCategoryFrame extends CategoryFrame
 			}
 			clickNode = (DefaultMutableTreeNode) currentPath.getLastPathComponent();
 			selected = (CustomerCategory) clickNode.getUserObject();
+			if(selected != null){
+				updateField.setText(selected.getCate_name());
+				enableButton();
+			}
 			if (arg0.getClickCount() != 2){
 				return;
 			}

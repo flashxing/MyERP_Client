@@ -29,21 +29,21 @@ public class CommonUtil {
 		if (object == null || object.length < 0){
 			showError("传入对象错误");
 		}
-		final Object columns[] = new Object[column.length+1];
+		final Object columns[] = new Object[column.length];
 		for(int i = 0; i < column.length; ++i){
 			columns[i] = column[i];
 		}
-		columns[column.length] = "修改";
+//		columns[column.length] = "修改";
 		JTable table = new JTable(){
 			@Override
             public TableCellRenderer getCellRenderer(int row, int column) {
-                if (column == columns.length-1 && row >= 0) {
-                    return new TableCellRenderer() {
-                        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                            return new JButton();
-                        }
-                    };
-                }
+//                if (column == columns.length-1 && row >= 0) {
+//                    return new TableCellRenderer() {
+//                        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+//                            return new JButton();
+//                        }
+//                    };
+//                }
                 return super.getCellRenderer(row, column);
             }
 		};
@@ -102,11 +102,11 @@ public class CommonUtil {
 		if (object == null || object.length < 0){
 			showError("传入对象错误");
 		}
-		final Object columns[] = new Object[column.length+1];
+		final Object columns[] = new Object[column.length];
 		for(int i = 0; i < column.length; ++i){
 			columns[i] = column[i];
 		}
-		columns[column.length] = "添加";
+//		columns[column.length] = "添加";
 		DefaultTableModel model = new DefaultTableModel(columns, 0);
 		for(Object obj:object){
 			Vector vdata = new Vector();

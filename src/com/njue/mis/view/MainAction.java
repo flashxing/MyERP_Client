@@ -430,4 +430,75 @@ public class MainAction
 			}
 		};
 	}
+	
+	public static ActionListener receiptOut() {
+		// TODO Auto-generated method stub
+		return new ActionListener()
+		{
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				ReceiptOutFrame receiptOutFrame = new ReceiptOutFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						receiptOutFrame);
+				receiptOutFrame.setVisible(true);
+			}
+		};
+	}
+	
+	public static ActionListener receiptIn() {
+		// TODO Auto-generated method stub
+		return new ActionListener()
+		{
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				ReceiptInFrame receiptInFrame = new ReceiptInFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						receiptInFrame);
+				receiptInFrame.setVisible(true);
+			}
+		};
+	}
+	
+	public static ActionListener receipInStatistics(){
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				StatisticFrame receiptStatisticFrame = new ReceiptInStatisticFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						receiptStatisticFrame);
+				receiptStatisticFrame.setVisible(true);
+			}
+		};
+	}
+	public static ActionListener receipOutStatistics(){
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				StatisticFrame receiptStatisticFrame = new ReceiptOutStatisticFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						receiptStatisticFrame);
+				receiptStatisticFrame.setVisible(true);
+			}
+		};
+	}
+	
+	public static ActionListener salesStatistics(){
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				StatisticFrame salesStatisticFrame = new SalesStatisticFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						salesStatisticFrame);
+				salesStatisticFrame.setVisible(true);
+			}
+		};
+	}
 }

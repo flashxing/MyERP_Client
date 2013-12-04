@@ -116,6 +116,16 @@ public class SalesFrame extends JInternalFrame
 			CommonUtil.showError("网络错误");
 		}
 	}
+	
+	private void resetData(){
+		date = new Date();
+		SimpleDateFormat formate =new SimpleDateFormat("yyyyMMddHHmmss");
+		salesIdField.setText("PS"+formate.format(date));
+		formate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		timeField.setText(formate.format(date));
+//		priceField.setText("");
+		numberField.setText("");
+	}
 
 	public JPanel importgoods()
 	{
@@ -425,6 +435,8 @@ public class SalesFrame extends JInternalFrame
 					CommonUtil.showError("添加销售单失败,可能库存不足");
 					return;
 				}
+				CommonUtil.showError("销售单添加成功");
+				resetData();
 				System.out.println();
 				System.out.println(result);
 			} catch (Exception e) {

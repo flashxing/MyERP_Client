@@ -1,14 +1,18 @@
 package com.njue.mis.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Toolkit;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
@@ -19,6 +23,7 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.njue.mis.common.CommonUtil;
@@ -40,9 +45,11 @@ public class CategoryFrame extends JInternalFrame
     protected DefaultMutableTreeNode clickNode;
     protected DefaultMutableTreeNode root;
     protected JTextField insertField;
+    protected JTextField updateField;
     protected JPanel panel;
     protected Container pane = this.getContentPane();
-    
+	private JScrollPane goodScrollPane;
+	
     protected Category toAdd;
     protected Category toDelete;
     public Category selected;
@@ -51,66 +58,79 @@ public class CategoryFrame extends JInternalFrame
     protected String[] objects;
     protected String[] fieldsToShow;
     protected Object[] initList = {};
+    protected ImageIcon image;
 	public CategoryFrame(String frameName,List<Category> list)
 	{
-		super(frameName,true,true,false,false);
+		super(frameName,true,true,true,true);
     }
+	
+	protected void enableButton(){
+		updateButton.setEnabled(true);
+		addButton.setEnabled(true);
+		removeButton.setEnabled(true);
+		addGoodsButton.setEnabled(true);
+	}
+	protected void enableAllButAddButton(){
+		updateButton.setEnabled(true);
+		removeButton.setEnabled(true);
+		addGoodsButton.setEnabled(true);
+	}
+	
+	protected void disableButton(){
+		updateButton.setEnabled(false);
+		addButton.setEnabled(false);
+		removeButton.setEnabled(false);	
+		addGoodsButton.setEnabled(false);
+	}
 	public void init(final List<Category> list)
 	{
 		addGoodsButton = new JButton("添加商品");
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setBounds(0, 0, screenSize.width * 2 / 3,
-				screenSize.height * 2 / 3);
+		this.setSize(new Dimension(screenSize.width * 2 / 3,
+				screenSize.height * 4/7));
 		this.list = list;
 		root = buildTree(list);
         simpleTree = new JTree(root);
         simpleTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-//        simpleTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener(){
-//            public void valueChanged( TreeSelectionEvent e ){
-//                System.out.println( "selection changed" );
-//            }
-//        });
         simpleTree.setRootVisible(false);
         simpleTree.setShowsRootHandles(true);
-//        simpleTree.putClientProperty("JTree.lineStyle","Horizontal");
         simpleTree.putClientProperty("JTree.lineStyle", "Angled");
-//        simpleTree.putClientProperty("JTree.lineStyle","None");
-//        simpleTree.setCellRenderer( new CustomTreeCellRenderer() );
         simpleTree.setEditable( false );
-//        simpleTree.getModel().addTreeModelListener(new TreeModelListener(){
-//                public void treeNodesChanged(TreeModelEvent e) {
-//                    System.out.println("node changed");
-//                }
-//                public void treeNodesInserted(TreeModelEvent e) {
-//                    System.out.println( "node inserted" );
-//                }
-//                public void treeNodesRemoved(TreeModelEvent e) {
-//                    System.out.println("node removed");
-//                }
-//                public void treeStructureChanged(TreeModelEvent e) {
-//                    System.out.println( "strutrued changed" );
-//                }
-//            });
-        scrollPane = new JScrollPane( simpleTree );
+        simpleTree.setCellRenderer(new MyRenderer());
+        simpleTree.setMaximumSize(new Dimension(screenSize.width * 2 / 3-60,
+				screenSize.height  / 80));
 
+        scrollPane = new JScrollPane( simpleTree );
+        scrollPane.setPreferredSize(new Dimension(screenSize.width * 1 / 8,
+				screenSize.height *1/80));
         addButton = new JButton ("添加分类");        
         updateButton = new JButton("更新分类");
-        
+
         removeButton = new JButton ("删除分类");
         insertField = new JTextField(20);
-        panel = new JPanel ( new GridLayout(30,30) );
+        updateField = new JTextField(10);
+        panel = new JPanel ();
+        disableButton();
         panel.add(insertField);
         panel.add( addButton );
         panel.add( removeButton );
+        panel.add(updateField);
         panel.add(updateButton);
         panel.add(addGoodsButton);
-        
-        this.getContentPane().add( panel,BorderLayout.LINE_START );
+
        
         table = CommonUtil.createTable(objects,initList,fieldsToShow);
-        this.getContentPane().add(new JScrollPane(table), BorderLayout.LINE_END);
+        table.setPreferredScrollableViewportSize(new Dimension(screenSize.width * 3 / 4,
+				screenSize.height  / 8));
+        goodScrollPane = new JScrollPane();
+        goodScrollPane.setViewportView(table);
+        goodScrollPane.setPreferredSize(new Dimension(screenSize.width * 2 / 3,
+				screenSize.height * 1/80));
+        this.getContentPane().add(goodScrollPane, BorderLayout.CENTER);
         
-        this.getContentPane().add( scrollPane,BorderLayout.CENTER  );
+        this.getContentPane().add( scrollPane,BorderLayout.WEST);
+        
+        this.getContentPane().add( panel,BorderLayout.SOUTH);
 	}
 	private Category getCategoryById(int cate_id){
 		for(Category category:list){
@@ -165,5 +185,15 @@ public class CategoryFrame extends JInternalFrame
         	}
         }
         return root;
+    }
+    private class MyRenderer extends DefaultTreeCellRenderer{
+    	public Component getTreeCellRendererComponent(JTree tree, Object value,boolean sel, boolean expanded, boolean leaf, int row,boolean hasFocus) 
+    	{
+    		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,row, hasFocus);
+    		setLeafIcon(image);//叶子结点图片
+    		setClosedIcon(image);//关闭树后显示的图片
+    		setOpenIcon(image);//打开树时显示的图片
+    		return this;
+    	}
     }
 }
