@@ -23,7 +23,7 @@ public class ReceiptInFrame extends ReceiptFrame {
 		timeField.setText(formate.format(date));
 	}
 	
-	public void reset(){
+	public void resetReceiptIn(){
 		super.reset();
 		initIn();
 	}
@@ -40,7 +40,7 @@ public class ReceiptInFrame extends ReceiptFrame {
 			if (receipt != null){
 				try {
 					if(receiptService.addReceipt(receipt)!=null){
-						reset();
+						resetReceiptIn();
 					}else{
 						CommonUtil.showError("ÃÌº” ß∞‹");
 						return;

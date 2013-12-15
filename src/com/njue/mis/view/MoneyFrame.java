@@ -45,17 +45,24 @@ import javax.swing.table.TableColumnModel;
 
 import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonUtil;
+import com.njue.mis.common.ButtonEditor;
+import com.njue.mis.common.ButtonRender;
 import com.njue.mis.common.CustomerButton;
 import com.njue.mis.common.MyButtonEditor;
 import com.njue.mis.common.MyButtonRender;
 import com.njue.mis.common.ReceiptItemButton;
+import com.njue.mis.common.MoneyItemButton;
 import com.njue.mis.interfaces.GoodsControllerInterface;
+import com.njue.mis.interfaces.MoneyControllerInterface;
 import com.njue.mis.interfaces.ReceiptControllerInterface;
 import com.njue.mis.interfaces.StockControllerInterface;
 import com.njue.mis.interfaces.StockObjectControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.GiftIn;
 import com.njue.mis.model.Goods;
+import com.njue.mis.model.Money;
+import com.njue.mis.model.MoneyItem;
+import com.njue.mis.model.MoneyItemDetail;
 import com.njue.mis.model.Receipt;
 import com.njue.mis.model.ReceiptIn;
 import com.njue.mis.model.ReceiptItem;
@@ -67,12 +74,8 @@ import javax.swing.JTextArea;
 import java.awt.Font;
 
 
-public class ReceiptFrame extends JInternalFrame
+public class MoneyFrame extends JInternalFrame
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -885141522366198922L;
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	
 	protected JTextField idField;
@@ -85,15 +88,14 @@ public class ReceiptFrame extends JInternalFrame
 	protected JTable table;
 	protected DefaultTableModel model;
 	protected JScrollPane scrollPane;
-	protected CustomerButton customerButton;
 	protected JTextArea commentArea;
 	protected Date date;
-	protected ReceiptControllerInterface receiptService;
+	protected MoneyControllerInterface moneyService;
 	protected String[] columns = {"编号","条目","金额","备注"};
-	protected List<ReceiptItemDetail> receiptItemDetailList;
-	public ReceiptFrame(String frameName)
+	protected List<MoneyItemDetail> moneyItemDetailList;
+	public MoneyFrame()
 	{
-		super(frameName,true,true,true,true);
+		super("钱流管理",true,true,true,true);
 		init();
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
 				screenSize.height * 4 / 7);
@@ -102,7 +104,7 @@ public class ReceiptFrame extends JInternalFrame
 	}
 	public void init(){
 		try {
-			receiptService = (ReceiptControllerInterface) Naming.lookup(Configure.ReceiptController);
+			moneyService = (MoneyControllerInterface) Naming.lookup(Configure.MoneyController);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -113,7 +115,7 @@ public class ReceiptFrame extends JInternalFrame
 	public void initBaseInfo(){
 		date = new Date();
 		SimpleDateFormat formate =new SimpleDateFormat("yyyyMMddHHmmss");
-		idField.setText("RI"+formate.format(date));
+		idField.setText("MR"+formate.format(date));
 		formate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		timeField.setText(formate.format(date));
 	}
@@ -122,39 +124,31 @@ public class ReceiptFrame extends JInternalFrame
 		while(model.getRowCount()>0){
 			model.removeRow(0);
 		}
+		initBaseInfo();
 	}
 	/*
 	 * type = 0 then return an receiptIn
 	 * type =1 then return an ReceiptOut
 	 */
-	public Receipt createReceip(int type){
+	public Money createMoney(){
 		String id = idField.getText();
-		if(customerButton.getCustomer() == null){
-			CommonUtil.showError("客户不能为空");
-			return null;
-		}
-		String customerId = customerButton.getCustomerId();
-		if(customerId.length()<0){
-			CommonUtil.showError("客户不能为空");
-			return null;
-		}
 		String moneyString = moneyField.getText();
 		Double money = 0.0;
 
 		String operator = operatorField.getText();
 		String time = timeField.getText();
 
-		receiptItemDetailList = new ArrayList<ReceiptItemDetail>();
+		moneyItemDetailList = new ArrayList<MoneyItemDetail>();
 		for(int i = 0; i < model.getRowCount(); i++){
 			int itemId = (Integer) model.getValueAt(i, 0);
 			System.out.println("itemId "+itemId);
-			MyButtonEditor cellEditor = (MyButtonEditor) table.getCellEditor(i, 1);
-			ReceiptItemButton itemButton;
-			itemButton = cellEditor.getButton();
-			if(itemButton.getReceiptItem() == null){
+			ButtonEditor cellEditor = (ButtonEditor) table.getCellEditor(i, 1);
+			MoneyItemButton itemButton;
+			itemButton = (MoneyItemButton) cellEditor.getButton();
+			if(itemButton.getMoneyItem() == null){
 				continue;
 			}
-			ReceiptItem item = itemButton.getReceiptItem();
+			MoneyItem item = itemButton.getMoneyItem();
 			if(item == null){
 				continue;
 			}
@@ -170,15 +164,9 @@ public class ReceiptFrame extends JInternalFrame
 				continue;
 			}
 			String item_comment = (String) model.getValueAt(i, 3);
-			receiptItemDetailList.add(new ReceiptItemDetail(id, itemId, item.getItem(), item_money, item_comment));
+			moneyItemDetailList.add(new MoneyItemDetail(id, itemId, item.getName(), item_money, item_comment));
 		}
-		if(type == 0){
-			return new ReceiptIn(id,customerId,money,time,operator,"",receiptItemDetailList);
-		}else if(type == 1){
-			return new ReceiptOut(id, customerId, money, time, operator, "",receiptItemDetailList);
-		}else{
-			return null;
-		}
+		return new Money(id,money,time,operator,moneyItemDetailList);
 	}
 	public JPanel importgoods()
 	{
@@ -188,8 +176,6 @@ public class ReceiptFrame extends JInternalFrame
 		JLabel idlable = new JLabel("编号:");
 		idField = new JTextField(12);
 		idField.setEditable(false);
-		JLabel customerLabel = new JLabel("客户:");
-		customerButton = new CustomerButton("......");
 		JLabel timeLabel = new JLabel("时间");
 		timeField = new JTextField(12);
 		timeField.setEditable(false);
@@ -199,8 +185,6 @@ public class ReceiptFrame extends JInternalFrame
 		operatorField.setEditable(false);
 		panelBaseInfo.add(idlable);
 		panelBaseInfo.add(idField);
-		panelBaseInfo.add(customerLabel);
-		panelBaseInfo.add(customerButton);
 		panelBaseInfo.add(timeLabel);
 		panelBaseInfo.add(timeField);
 		panelBaseInfo.add(operatorLabel);
@@ -234,8 +218,8 @@ public class ReceiptFrame extends JInternalFrame
 			}
 		};
 		table = new JTable(model);
-		table.getColumnModel().getColumn(1).setCellRenderer(new MyButtonRender());
-		table.getColumnModel().getColumn(1).setCellEditor(new MyButtonEditor());
+		table.getColumnModel().getColumn(1).setCellRenderer(new ButtonRender<MoneyItemButton>(MoneyItemButton.class));
+		table.getColumnModel().getColumn(1).setCellEditor(new ButtonEditor<MoneyItemButton>(MoneyItemButton.class));
 		CommonUtil.setDuiqi(table);
 		table.setModel(model);
 		table.setRowSelectionAllowed(false);
@@ -251,6 +235,7 @@ public class ReceiptFrame extends JInternalFrame
 				
 		JPanel panelButton = new JPanel();
 		addButton = new JButton("添加");
+		addButton.addActionListener(new AddAction());
 		JButton cacelButton = new JButton("取消");
 		cacelButton.addActionListener(new ActionListener(){
 
@@ -272,22 +257,6 @@ public class ReceiptFrame extends JInternalFrame
 		panel.add(panelButton, BorderLayout.SOUTH);
 		return panel;
 	}
-	
-	//设置JTable表格单元格对齐的效果     
-    public void setDuiqi(JTable table)     
-    {     
-        //对其方式设置     
-        DefaultTableCellRenderer d = new DefaultTableCellRenderer();     
-                  
-        //设置表格单元格的对齐方式为居中对齐方式     
-        d.setHorizontalAlignment(JLabel.RIGHT);     
-        for(int i = 0; i< table.getColumnCount();i++)     
-        {     
-            TableColumn col = table.getColumn(table.getColumnName(i));     
-            col.setCellRenderer(d);     
-        }     
-    }     
-	
 	private class AddItemAction implements ActionListener{
 
 		@Override
@@ -311,12 +280,35 @@ public class ReceiptFrame extends JInternalFrame
 				return;
 			}
 			int index = table.getSelectedRow();
-			System.out.println(index);
 			if(!(index<table.getRowCount()&&index>=0)){
 				CommonUtil.showError("请先选择一个条目");
 				return;
 			}
 			model.removeRow(index);
+		}
+		
+	}
+	
+	private class AddAction implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			// TODO Auto-generated method stub
+			Money money = createMoney();
+			if (money!= null){
+				try {
+					if(moneyService.addMoney(money)!=null){
+						reset();
+					}else{
+						CommonUtil.showError("添加失败");
+						return;
+					}
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					CommonUtil.showError("网络错误");
+				}
+			}
 		}
 		
 	}

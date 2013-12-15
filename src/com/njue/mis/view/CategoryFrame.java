@@ -78,7 +78,6 @@ public class CategoryFrame extends JInternalFrame
 	
 	protected void disableButton(){
 		updateButton.setEnabled(false);
-		addButton.setEnabled(false);
 		removeButton.setEnabled(false);	
 		addGoodsButton.setEnabled(false);
 	}
@@ -125,7 +124,7 @@ public class CategoryFrame extends JInternalFrame
         goodScrollPane = new JScrollPane();
         goodScrollPane.setViewportView(table);
         goodScrollPane.setPreferredSize(new Dimension(screenSize.width * 2 / 3,
-				screenSize.height * 1/80));
+				screenSize.height * 1/8));
         this.getContentPane().add(goodScrollPane, BorderLayout.CENTER);
         
         this.getContentPane().add( scrollPane,BorderLayout.WEST);

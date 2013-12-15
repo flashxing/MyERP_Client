@@ -1,7 +1,6 @@
 package com.njue.mis.view;
 
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
@@ -33,9 +32,6 @@ import javax.swing.table.AbstractTableModel;
 import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
-import com.njue.mis.common.CustomerButton;
-import com.njue.mis.common.GoodsButton;
-import com.njue.mis.common.GoodsItemPanel;
 import com.njue.mis.interfaces.GoodsControllerInterface;
 import com.njue.mis.interfaces.PortControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
@@ -44,15 +40,19 @@ import com.njue.mis.model.PortIn;
 import com.njue.mis.model.StoreHouse;
 
 
-public class InportFrame extends JInternalFrame
+public class CopyOfInportFrame extends JInternalFrame
 {
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	
 	private JTextField ID_importtextField;
+	private JTextField priceField;
+	private JTextField numberField;
 	private JComboBox storeHouseComboBox;
 	private JTextField importtimeField;
 	private JTextField operaterField;
 	private JTextField goodsField;
+	private JTextField explainField;
+	private JTextField customerField;
 	private JTextField goodsNameField;
 	private Vector<Goods> goodsVec;
 	private List<StoreHouse> storeHouseList;
@@ -64,21 +64,20 @@ public class InportFrame extends JInternalFrame
     private JTable goodsTable;
 	private JScrollPane goodScrollPane;
 
-	private CustomerButton customerButton;
+	private JButton customerButton;
 	private GoodsControllerInterface handler;
 	
 	private Goods selectedGoods;
 	
-	private GoodsItemPanel panelGoods;
-	public InportFrame()
+	public CopyOfInportFrame()
 	{
 		super("进货单",true,true,true,true);
+		
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
-				screenSize.height * 4 / 7);
+				screenSize.height * 2 / 3);
 		this.getContentPane().add(importgoods());
 	}
 
-	
 	public JPanel importgoods()
 	{
 		//get the goods data and storeHouse data
@@ -94,19 +93,29 @@ public class InportFrame extends JInternalFrame
 			CommonUtil.showError("网络错误");
 			return null;
 		}
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setSize(screenSize.width * 3 / 5,
-				screenSize.height * 3 / 5);
+		JPanel panel = new JPanel();
+		
 		JPanel panel1 = new JPanel();
 		JLabel ID_importlable = new JLabel("进货票号:");
 		ID_importtextField = new JTextField(10);
+		JLabel priceLabel = new JLabel("进货单价:");
+		priceField = new JTextField(10); 
+		JLabel numberLabel = new JLabel("数量:");
+		numberField = new JTextField(10);
 		JLabel customerLabel = new JLabel("供应商:");
-		customerButton = new CustomerButton("...");
+		customerField = new JTextField(10);
+		customerButton = new JButton("...");
 		customerButton.setSize(5, 5);
 		panel1.add(ID_importlable);
 		panel1.add(ID_importtextField);
+		panel1.add(priceLabel);
+		panel1.add(priceField);
+		panel1.add(numberLabel);
+		panel1.add(numberField);
 		panel1.add(customerLabel);
+		panel1.add(customerField);
 		panel1.add(customerButton);
+		
 		
 		JPanel panel2 = new JPanel();
 		JLabel paytypeLabel = new JLabel("仓库选择:");
@@ -123,8 +132,6 @@ public class InportFrame extends JInternalFrame
 		panel2.add(opreaterLabel);
 		panel2.add(operaterField);
 		
-		initBase();
-		panelGoods = new GoodsItemPanel(ID_importtextField.getText());
 		JPanel panel3 = new JPanel();
 		goodScrollPane = new JScrollPane();
 
@@ -176,8 +183,6 @@ public class InportFrame extends JInternalFrame
 				}
 			}
 		});
-		GoodsButton goodsButton = new GoodsButton("。。。");
-		panelSearch.add(goodsButton);
 		panelSearch.add(goodsNameLabel);
 		panelSearch.add(goodsNameField);
 		panelSearch.add(searchButton);
@@ -203,36 +208,70 @@ public class InportFrame extends JInternalFrame
 //		panel3.add(goodScrollPane);
 		
 		JPanel panel4 = new JPanel();
+		JLabel goodsLabel = new JLabel("商品编号:");
+		goodsField = new JTextField(10);
+		JLabel explainLabel = new JLabel("商品注释:");
+		explainField = new JTextField(20);
 		
+		JButton addButton = new JButton("添加");
+		addButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				Date date=new Date();
+				SimpleDateFormat formate=new SimpleDateFormat("yyyyMMddHHmmss");
+				ID_importtextField.setText("PI"+formate.format(date));
+				formate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				importtimeField.setText(formate.format(date));
+				operaterField.setText(MainFrame.username);
+				numberField.setText("");
+				setEnableTrue();
+			}
+		});
 		JButton inButton = new JButton("入库");
 		inButton.addActionListener(new ActionListener()
 		{
 			
 			public void actionPerformed(ActionEvent e)
 			{
-				if(panelGoods.getGoodsItemList() == null || panelGoods.getGoodsItemList().size() <= 0){
+				if(selectedGoods == null){
 					CommonUtil.showError("请先选择一个商品");
 					return;
 				}
 				String inportID=ID_importtextField.getText();
+				String numberStr=numberField.getText();
 				int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
 				String inportTime=importtimeField.getText();
 				String operator=operaterField.getText();
-				if(customerButton.getCustomer() == null){
-					CommonUtil.showError("请选择一个客户");
+				String goodsID=selectedGoods.getId();
+				String comment=explainField.getText();
+				double goodsPrice = 0;
+				if(numberStr==null||numberStr.trim().length()==0)
+				{
+					JOptionPane.showMessageDialog(null,"请输入商品数量","警告",JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				String customerId = customerButton.getCustomerId();				
-				PortIn portIn=new PortIn(inportID,"",shId,0,
-						                  panelGoods.getMoney(),inportTime,operator,"",customerId,panelGoods.getGoodsItemList());
+				int number=0;
+				try
+				{
+					number=Integer.valueOf(numberStr);
+					goodsPrice = Double.valueOf(priceField.getText());
+				}
+				catch (Exception ex)
+				{
+					JOptionPane.showMessageDialog(null,"商品的数量和价格必须为数字","警告",JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				PortIn portIn=new PortIn(inportID,goodsID,shId,number,
+						                  goodsPrice,inportTime,operator,comment,0);
 				
 				try {
 					if (portInService.addPortIn(portIn)!=null)
 					{
 						JOptionPane.showMessageDialog(null,"入货单添加成功","警告",JOptionPane.WARNING_MESSAGE);
+						numberField.setText("");
 						setEnableFalse();
-						initBase();
-						panelGoods.clearData();
 					}
 					else
 					{
@@ -249,35 +288,38 @@ public class InportFrame extends JInternalFrame
 		});
 		
 		setEnableFalse();  
+		panel4.add(goodsLabel);
+		panel4.add(goodsField);
+		panel4.add(explainLabel);
+		panel4.add(explainField);
+		panel4.add(addButton);
 		panel4.add(inButton);
-		panel1.add(panel2);
-		panel.add(panel1,BorderLayout.NORTH);
-//		panel.add(panelSearch);
-		panel.add(panelGoods, BorderLayout.CENTER);
-		panel.add(panel4,BorderLayout.SOUTH);
+		panel.add(panel1);
+		panel.add(panel2);
+		panel.add(panelSearch);
+		panel.add(panel3);
+		panel.add(panel4);
 		return panel;
-	}
-	
-	private void initBase(){
-		Date date=new Date();
-		SimpleDateFormat formate=new SimpleDateFormat("yyyyMMddHHmmss");
-		ID_importtextField.setText("PI"+formate.format(date));
-		formate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		importtimeField.setText(formate.format(date));
-		operaterField.setText(MainFrame.username);
-		setEnableTrue();
 	}
 	//设置部分控件为不可用状态
 	private void setEnableFalse()
 	{
 		ID_importtextField.setEnabled(false);
+		priceField.setEnabled(false);
+		numberField.setEnabled(false);
+		storeHouseComboBox.setEnabled(false);
 		importtimeField.setEnabled(false);
 		operaterField.setEnabled(false);
+		explainField.setEnabled(false);
+		goodsField.setEnabled(false);
 	}
 	//设置部分控件为可用状态
 	private void setEnableTrue()
 	{
+		numberField.setEnabled(true);
 		storeHouseComboBox.setEnabled(true);
+		explainField.setEnabled(true);
+		priceField.setEnabled(true);
 	}
 	
 	

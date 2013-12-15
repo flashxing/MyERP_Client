@@ -25,6 +25,10 @@ public class ReceiptOutFrame extends ReceiptFrame {
 	public void addListener(){
 		addButton.addActionListener(new AddAction());
 	}
+	public void resetReceiptOut(){
+		super.reset();
+		initReceiptOut();
+	}
 	private class AddAction implements ActionListener{
 
 		@Override
@@ -34,7 +38,7 @@ public class ReceiptOutFrame extends ReceiptFrame {
 			if (receipt != null){
 				try {
 					if(receiptService.addReceipt(receipt)!=null){
-						reset();
+						resetReceiptOut();
 					}else{
 						CommonUtil.showError("ÃÌº” ß∞‹");
 						return;

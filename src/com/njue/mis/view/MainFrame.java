@@ -104,9 +104,9 @@ public class MainFrame extends JFrame
 			menuItem.addActionListener(MainAction.salesBack());
 			menu.add(menuItem);
 			//todo add the actionListener
-			menuItem = new JMenuItem("销售进货");
-			menuItem.addActionListener(MainAction.salesBack());
-			menu.add(menuItem);
+//			menuItem = new JMenuItem("销售进货");
+//			menuItem.addActionListener(MainAction.salesBack());
+//			menu.add(menuItem);
 			menuItem = new JMenuItem("业务单稿");
 			menuItem.addActionListener(MainAction.salesBack());
 			menu.add(menuItem);
@@ -121,9 +121,9 @@ public class MainFrame extends JFrame
 			menuItem = new JMenuItem("商品查询");
 			menuItem.addActionListener(MainAction.clickGoodsInforserch());
 			menu.add(menuItem);
-			menuItem = new JMenuItem("供应商查询");
-			menuItem.addActionListener(MainAction.clickPrivoderInforSearch());
-			menu.add(menuItem);
+//			menuItem = new JMenuItem("供应商查询");
+//			menuItem.addActionListener(MainAction.clickPrivoderInforSearch());
+//			menu.add(menuItem);
 			menuItem = new JMenuItem("销售查询");
 			menuItem.addActionListener(MainAction.clickSaleInforSearch());
 			menu.add(menuItem);
@@ -143,6 +143,9 @@ public class MainFrame extends JFrame
 			menuBar.add(menu);
 			menuItem = new JMenuItem("仓库管理");
 			menuItem.addActionListener(MainAction.storeHouseManager());
+			menu.add(menuItem);
+			menuItem = new JMenuItem("库存查看");
+			menuItem.addActionListener(MainAction.stockManager());
 			menu.add(menuItem);
 			menuItem = new JMenuItem("库存盘点");
 			menuItem.addActionListener(MainAction.storeHouseInfor());
@@ -185,6 +188,7 @@ public class MainFrame extends JFrame
 //			menu.add(menuItem);
 			
 			menuItem = new JMenuItem("钱流管理");
+			menuItem.addActionListener(MainAction.moneyManager());
 			menu.add(menuItem);
 		}
 		if(CommonUtil.hasPermisson(user, "统计报表")){
@@ -200,6 +204,10 @@ public class MainFrame extends JFrame
 			
 			menuItem = new JMenuItem("销售统计");
 			menuItem.addActionListener(MainAction.salesStatistics());
+			menu.add(menuItem);
+			
+			menuItem = new JMenuItem("进货统计");
+			menuItem.addActionListener(MainAction.inPortStatistics());
 			menu.add(menuItem);
 		}
 

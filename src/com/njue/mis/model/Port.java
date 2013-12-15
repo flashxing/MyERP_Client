@@ -5,30 +5,35 @@
 package com.njue.mis.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class Port implements Serializable
+public class Port implements Serializable
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6974161517485100177L;
-	private String id;  //编号
-	private String goodsId;  //商品编号
-	private int storeHouseId;  //仓库
-	private int number;  //数量
-	private double price; //价格
-	private String time;  //支付时间
-	private String operatePerson;  //操作员
-	private String comment;  //注释
-	private int customerId; //客户id
+	protected static final long serialVersionUID = -6974161517485100177L;
+	protected String id;  //编号
+	protected String goodsId;  //商品编号
+	protected int storeHouseId;  //仓库
+	protected int number;  //数量
+	protected double price; //价格
+	protected String time;  //支付时间
+	protected String operatePerson;  //操作员
+	protected String comment;  //注释
+	protected String customerId; //客户id
+	protected List<GoodsItem> goodsItemList;
+
 	public Port()
 	{
 		super();
+		goodsItemList = new ArrayList<GoodsItem>();
 		// TODO Auto-generated constructor stub
 	}
 	public Port(String id, String goodsId, int storeHouseId,
 			int number, double price, String time, String operatePerson,
-			String comment,int customerId)
+			String comment,String customerId, List<GoodsItem> goodsItemList)
 	{
 		super();
 		this.id = id;
@@ -40,6 +45,7 @@ public abstract class Port implements Serializable
 		this.comment = comment;
 		this.storeHouseId = storeHouseId;
 		this.customerId = customerId;
+		this.goodsItemList = goodsItemList;
 	}
 	public String getId()
 	{
@@ -109,55 +115,26 @@ public abstract class Port implements Serializable
 	{
 		this.time = time;
 	}
-	public void setCustomerId(int customerId){
+	public void setCustomerId(String customerId){
 		this.customerId = customerId;
 	}
-	public int getCustomerId(){
+	public String getCustomerId(){
 		return this.customerId;
 	}
-//	/**
-//	 * 表格控件调用
-//	 * @param columnNumber 列号
-//	 * @return 对应列的值
-//	 */
-//	public Object getPortValue(int columnNumber)
-//	{
-//		switch (columnNumber)
-//		{
-//		case 0:
-//			return ValidationManager.changeNull(getId());
-//		case 1:
-//			return ValidationManager.changeNull(getGoodsId());
-//		case 2:
-//			{
-//				GoodsControllerInterface handler=CommonFactory.getGoodsServices();
-//				Goods goods=handler.getGoodsInfo(getGoodsId());
-//				return  ValidationManager.changeNull(goods.getGoodsName());
-//			}
-//		case 3:
-//			{
-//				GoodsControllerInterface handler=CommonFactory.getGoodsServices();
-//				Goods goods=handler.getGoodsInfo(getGoodsId());
-//				return  ValidationManager.changeNull(goods.getPrice());
-//			}
-//		case 4:
-//			return ValidationManager.changeNull(getNumber());
-//		case 5:
-//			return ValidationManager.changeNull(getPrice());
-//		case 6:
-//			return ValidationManager.changeNull(getProviderId());
-//		case 7:
-//			{
-//				ProviderServicesHandler handler=CommonFactory.getProviderServices();
-//				Provider provider=handler.getProviderInfo(getProviderId());
-//				return ValidationManager.changeNull(provider.getName());
-//			}
-//		case 8:
-//			return ValidationManager.changeNull(getTime());
-//		case 9:
-//			return ValidationManager.changeNull(getOperatePerson());
-//		default:
-//			return "";
-//		}
-//	}
+	public List<GoodsItem> getGoodsItemList() {
+		return goodsItemList;
+	}
+	public void setGoodsItemList(List<GoodsItem> goodsItemList) {
+		this.goodsItemList = goodsItemList;
+	}
+	
+	public Port clone(){
+		List<GoodsItem> list = new ArrayList<GoodsItem>();
+		for(GoodsItem item: goodsItemList){
+			list.add(item);
+		}
+		return new Port(id, goodsId, storeHouseId,
+			number, price, time, operatePerson,
+			comment,customerId, list);
+	}
 }

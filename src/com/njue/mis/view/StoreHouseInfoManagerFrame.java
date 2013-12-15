@@ -24,7 +24,6 @@ import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.ValidationManager;
 import com.njue.mis.interfaces.CategoryControllerInterface;
 import com.njue.mis.interfaces.GoodsControllerInterface;
-import com.njue.mis.interfaces.ProviderServicesHandler;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Goods;
 import com.njue.mis.model.StoreHouse;

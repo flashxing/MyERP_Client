@@ -1,6 +1,8 @@
 package com.njue.mis.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Receipt implements Serializable{
 	/**
@@ -13,16 +15,25 @@ public class Receipt implements Serializable{
 	public String time;
 	public String operator;
 	public String comment;
+	public List<ReceiptItemDetail> receiptItemDetailList;
+	public List<ReceiptItemDetail> getReceiptItemDetailList() {
+		return receiptItemDetailList;
+	}
+	public void setReceiptItemDetailList(
+			List<ReceiptItemDetail> receiptItemDetailList) {
+		this.receiptItemDetailList = receiptItemDetailList;
+	}
 	public Receipt(){
 		
 	}
-	public Receipt(String id, String customerId, Double money, String time, String operator, String comment){
+	public Receipt(String id, String customerId, Double money, String time, String operator, String comment, List<ReceiptItemDetail> receiptItemDetailList){
 		this.id = id;
 		this.customerId = customerId;
 		this.money = money;
 		this.time = time;
 		this.operator = operator;
 		this.comment = comment;
+		this.receiptItemDetailList = receiptItemDetailList;
 	}
 	public String getId() {
 		return id;
@@ -59,5 +70,13 @@ public class Receipt implements Serializable{
 	}
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	
+	public Receipt clone(){
+		List<ReceiptItemDetail> list = new ArrayList<ReceiptItemDetail>();
+		for(ReceiptItemDetail itemDetail: receiptItemDetailList){
+			list.add(itemDetail.clone());
+		}
+		return new Receipt(id, customerId, money, time, operator, comment, list);
 	}
 }

@@ -25,6 +25,7 @@ import com.njue.mis.common.ValidationManager;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.CustomerServicesHandler;
 import com.njue.mis.model.Customer;
+import com.njue.mis.model.CustomerMoney;
 
 public class CustomerFrame extends JInternalFrame
 {
@@ -212,7 +213,7 @@ public class CustomerFrame extends JInternalFrame
 									.getText(), customer_linkpField.getText(),
 							customer_linktField.getText(), customer_mailField
 									.getText(), customer_bankField.getText(),
-							customer_bankIDField.getText(),1,cateId)) != null)
+							customer_bankIDField.getText(),1,cateId,new CustomerMoney(simple_custoField.getText(), 0, 0))) != null)
 					{
 						JOptionPane.showMessageDialog(null, "客户信息添加成功！", "消息",
 								JOptionPane.INFORMATION_MESSAGE);

@@ -110,18 +110,18 @@ public class MainAction
 		};
 	}
 
-	public static ActionListener clickProviderInfoManager()
-	{
-		return new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				ProviderFrame privoderFrame = new ProviderFrame();
-				MainFrame.getMainFrame().getContentPane().add(privoderFrame);
-				privoderFrame.setVisible(true);
-			}
-		};
-	}
+//	public static ActionListener clickProviderInfoManager()
+//	{
+//		return new ActionListener()
+//		{
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				ProviderFrame privoderFrame = new ProviderFrame();
+//				MainFrame.getMainFrame().getContentPane().add(privoderFrame);
+//				privoderFrame.setVisible(true);
+//			}
+//		};
+//	}
 
 	public static ActionListener clickCustomerInforserch()
 	{
@@ -179,20 +179,20 @@ public class MainAction
 		};
 	}
 	
-	public static ActionListener clickPrivoderInforSearch()
-	{
-		return new ActionListener()
-		{
-			
-			public void actionPerformed(ActionEvent e)
-			{
-				ProviderInforSearchFrame privoderInforSearchFrame = new ProviderInforSearchFrame();
-				MainFrame.getMainFrame().getContentPane().add(
-						privoderInforSearchFrame);
-				privoderInforSearchFrame.setVisible(true);
-			}
-		};
-	}
+//	public static ActionListener clickPrivoderInforSearch()
+//	{
+//		return new ActionListener()
+//		{
+//			
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				ProviderInforSearchFrame privoderInforSearchFrame = new ProviderInforSearchFrame();
+//				MainFrame.getMainFrame().getContentPane().add(
+//						privoderInforSearchFrame);
+//				privoderInforSearchFrame.setVisible(true);
+//			}
+//		};
+//	}
 	
 	public static ActionListener clickSaleBackInforSearch()
 	{
@@ -501,4 +501,45 @@ public class MainAction
 			}
 		};
 	}
+	public static ActionListener inPortStatistics(){
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				StatisticFrame inPortStatisticFrame = new InportStatisticFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						inPortStatisticFrame);
+				inPortStatisticFrame.setVisible(true);
+			}
+		};
+	}
+	
+	public static ActionListener stockManager(){
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				StockManagerFrame stockManagerFrame = new StockManagerFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						stockManagerFrame);
+				stockManagerFrame.setVisible(true);
+			}
+		};
+	}
+
+	public static ActionListener moneyManager() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				MoneyFrame moneyFrame = new MoneyFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						moneyFrame);
+				moneyFrame.setVisible(true);
+			}
+		};
+
+	}
+	
 }

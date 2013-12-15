@@ -11,6 +11,10 @@ import com.njue.mis.common.ValidationManager;
 
 public abstract class Person implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 56554166589725426L;
 	public String id;  //编号
 	public String name;  //全称
 	public String zip;  //邮编
@@ -24,14 +28,16 @@ public abstract class Person implements Serializable
 	public String account;  //开户账号
 	public int available;  //状态 非0代表可用
 	public int cateId;
+	public CustomerMoney customerMoney;
 
 	public Person()
 	{
 		super();
+		customerMoney = new CustomerMoney();
 	}
 	public Person(String id, String name, String zip, String address,
 			String telephone, String connectionPerson, String phone,
-			String bank, String account, String email, String fax)
+			String bank, String account, String email, String fax, CustomerMoney customerMoney)
 	{
 		super();
 		this.id = id;
@@ -45,12 +51,13 @@ public abstract class Person implements Serializable
 		this.email = email;
 		this.bank = bank;
 		this.account = account;
+		this.customerMoney = customerMoney;
 	}
 	
 	public Person(String id, String name, String zip, String address,
 			String telephone, String fax, String connectionPerson,
 			String phone, String email, String bank, String account,
-			int available, int cateId)
+			int available, int cateId, CustomerMoney customerMoney)
 	{
 		super();
 		this.id = id;
@@ -66,6 +73,7 @@ public abstract class Person implements Serializable
 		this.account = account;
 		this.available = available;
 		this.cateId = cateId;
+		this.customerMoney = customerMoney;
 	}
 	
 	public void update(Person person){
@@ -183,6 +191,12 @@ public abstract class Person implements Serializable
 	}
 	public int getCateId(){
 		return cateId;
+	}
+	public CustomerMoney getCustomerMoney() {
+		return customerMoney;
+	}
+	public void setCustomerMoney(CustomerMoney customerMoney) {
+		this.customerMoney = customerMoney;
 	}
 	/**
 	 * 表格控件调用

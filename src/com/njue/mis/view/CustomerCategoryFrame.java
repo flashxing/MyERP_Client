@@ -24,6 +24,7 @@ import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.model.Category;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.CustomerCategory;
+import com.njue.mis.model.CustomerMoney;
 
 public class CustomerCategoryFrame extends CategoryFrame
 {
@@ -31,6 +32,8 @@ public class CustomerCategoryFrame extends CategoryFrame
 	 * 
 	 */
 	private static final long serialVersionUID = -6208433914029145693L;
+	private CategoryControllerInterface categoryService;
+	private CustomerControllerInterface customerService;
 	public CustomerCategoryFrame(List<Category> list)
 	{
 		super("客户管理",list);
@@ -40,11 +43,18 @@ public class CustomerCategoryFrame extends CategoryFrame
     }
 	public void init(final List<Category> list)
 	{
+		try {
+			customerService = (CustomerControllerInterface) Naming.lookup(Configure.CustomerController);
+			categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
+		} catch (MalformedURLException | RemoteException | NotBoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		objects = new String[]{
-				"客户编号","客户姓名"
+				"客户编号","客户姓名","邮箱","电话","地址","应付","应收"
 		};
 		fieldsToShow = new String[]{
-				"id","name"
+				"id","name","email","telephone","address","give","receive"
 		};
 		super.init(list);
 		addGoodsButton.setText("添加客户");
@@ -81,22 +91,13 @@ public class CustomerCategoryFrame extends CategoryFrame
                 }
                 toAdd.setPrefer_id(selected.getCate_id());
                 try {
-    				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
     				if (categoryService.categoryHasCustomer(selected.getCate_id())){
     					CommonUtil.showError("不能在该分类下添加子类，该分类下存在客户");
     					return;
     				}
     				toAdd.setCate_id(categoryService.addCategory(toAdd));
     				insertField.setText("");
-    			} catch (MalformedURLException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
     			} catch (RemoteException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
-    			} catch (NotBoundException e1) {
     				// TODO Auto-generated catch block
     				e1.printStackTrace();
     				CommonUtil.showError("网络连接错误");
@@ -126,22 +127,13 @@ public class CustomerCategoryFrame extends CategoryFrame
 			}
 			toDelete = (CustomerCategory) clickNode.getUserObject();
             try {
-				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
 				if (categoryService.categoryHasGoods(toDelete.getCate_id())){
 					CommonUtil.showError("不能删除该分类,该分类还有客户存在");
 					return;
 				}
 				categoryService.delCategory(toDelete);
 				clickNode.removeFromParent();
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				CommonUtil.showError("网络连接错误");
 			} catch (RemoteException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				CommonUtil.showError("网络连接错误");
-			} catch (NotBoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				CommonUtil.showError("网络连接错误");
@@ -167,20 +159,11 @@ public class CustomerCategoryFrame extends CategoryFrame
                 String tmpCateName = toUpdate.getCate_name();
                 toUpdate.setCate_name(updateField.getText());
                 try {
-    				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
     				if(!categoryService.updateCategory(toUpdate)){
     					toUpdate.setCate_name(tmpCateName);
     					CommonUtil.showError("更新失败");
     				}
-    			} catch (MalformedURLException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
     			} catch (RemoteException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
-    			} catch (NotBoundException e1) {
     				// TODO Auto-generated catch block
     				e1.printStackTrace();
     				CommonUtil.showError("网络连接错误");
@@ -211,21 +194,20 @@ public class CustomerCategoryFrame extends CategoryFrame
 			if(clickNode.isLeaf()){
 				int cateId = selected.getCate_id();
 				try{
-					CustomerControllerInterface customerService = (CustomerControllerInterface) Naming.lookup(Configure.CustomerController);
 					Vector<Customer> customerList = customerService.getAllCustomerByCateId(cateId);
+					Vector<CustomerMoney> customerMoneyList = new Vector<>();
+					for(Customer customer:customerList){
+						if(customer.getCustomerMoney() == null){
+							customerMoneyList.add(new CustomerMoney(customer.getId(), 0 , 0));
+						}else{
+							customerMoneyList.add(customer.getCustomerMoney());
+						}
+					}
 					if(customerList != null){
-						CommonUtil.updateJTable(table, objects, customerList.toArray(), fieldsToShow);
+						CommonUtil.updateJTable(table, objects, fieldsToShow, customerList.toArray(), customerMoneyList.toArray());
 					}
 					table.repaint();
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					CommonUtil.showError("网络连接错误");
 				} catch (RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					CommonUtil.showError("网络连接错误");
-				} catch (NotBoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					CommonUtil.showError("网络连接错误");

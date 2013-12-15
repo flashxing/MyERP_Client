@@ -6,9 +6,6 @@ package com.njue.mis.common;
 import com.njue.mis.interfaces.CustomerServicesHandler;
 import com.njue.mis.interfaces.GoodsControllerInterface;
 import com.njue.mis.interfaces.OperatorControllerInterface;
-import com.njue.mis.interfaces.PortInControllerService;
-import com.njue.mis.interfaces.PortOutServicesHandle;
-import com.njue.mis.interfaces.ProviderServicesHandler;
 import com.njue.mis.interfaces.SalesBackServicesHandler;
 import com.njue.mis.interfaces.SalesInServicesHandler;
 
@@ -51,18 +48,7 @@ public class CommonFactory
 	 * 获取ProviderServices类的对象
 	 * @return ProviderServices类的对象
 	 */
-	public static ProviderServicesHandler getProviderServices()
-	{
-		try
-		{
-			return (ProviderServicesHandler)Class.forName(Constants.PROVIDER_SERVICES_CLASS).newInstance();
-		}
-		catch (Exception e)
-		{
-			ErrorManager.printError("CommontFactory.getProviderServices", e);
-		}
-		return null;
-	}
+
 	/**
 	 * 获取OperatorServices类的对象
 	 * @return OperatorServices类的对象
@@ -83,34 +69,12 @@ public class CommonFactory
 	 * 获取PortInServices类的对象
 	 * @return PortInServices类的对象
 	 */
-	public static PortInControllerService getPortInServices()
-	{
-		try
-		{
-			return (PortInControllerService)Class.forName(Constants.PORTIN_SERVICES_CLASS).newInstance();
-		}
-		catch (Exception e)
-		{
-			ErrorManager.printError("CommontFactory.PortInServicesHandle", e);
-		}
-		return null;
-	}
+
 	/**
 	 * 获取PortOutServices类的对象
 	 * @return PortOutServices类的对象
 	 */
-	public static PortOutServicesHandle getPortOutServices()
-	{
-		try
-		{
-			return (PortOutServicesHandle)Class.forName(Constants.PORTOUT_SERVICES_CLASS).newInstance();
-		}
-		catch (Exception e)
-		{
-			ErrorManager.printError("CommontFactory.getPortOutServices", e);
-		}
-		return null;
-	}
+
 	
 	/**
 	 * 获取SalesBackServices类的对象

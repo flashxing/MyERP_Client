@@ -5,9 +5,15 @@
 package com.njue.mis.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Sales implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6443419034025095969L;
 	public String id;  //编号
 	public String customerId;  //客户编号
 	public String goodsId;  //商品编号
@@ -19,6 +25,7 @@ public abstract class Sales implements Serializable
 	public double discount;
 	public double totalPrice;
 	public int shId;
+	public List<SalesGoodsItem> goodsItemsList;
 	public double getDiscount() {
 		return discount;
 	}
@@ -46,11 +53,12 @@ public abstract class Sales implements Serializable
 	public Sales()
 	{
 		super();
+		goodsItemsList = new ArrayList<>();
 	}
 
 	public Sales(String id, String customerId, String goodsId, 
 			int number, double price, String time, String operatePerson,
-			String comment,double discount, double totalPrice, int shId)
+			String comment,double discount, double totalPrice, int shId, List<SalesGoodsItem> goodsItemList)
 	{
 		super();
 		this.id = id;
@@ -64,6 +72,7 @@ public abstract class Sales implements Serializable
 		this.discount = discount;
 		this.totalPrice = totalPrice;
 		this.shId = shId;
+		this.goodsItemsList = goodsItemList;
 	}
 
 	public String getId()
@@ -130,5 +139,11 @@ public abstract class Sales implements Serializable
 	public void setPrice(double price)
 	{
 		this.price = price;
+	}
+	public List<SalesGoodsItem> getGoodsItemsList() {
+		return goodsItemsList;
+	}
+	public void setGoodsItemsList(List<SalesGoodsItem> goodsItemList) {
+		this.goodsItemsList = goodsItemList;
 	}
 }

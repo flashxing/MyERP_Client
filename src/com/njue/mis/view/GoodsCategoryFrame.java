@@ -31,13 +31,27 @@ public class GoodsCategoryFrame extends CategoryFrame
 	 * 
 	 */
 	private static final long serialVersionUID = 1446389238639775488L;
+	private CategoryControllerInterface categoryService;
+	private GoodsControllerInterface goodsService;
+	
 	public GoodsCategoryFrame(List<Category> list)
 	{
 		super("商品管理",list);
 		image = new ImageIcon("images/goods.png");
 		image.setImage(image.getImage().getScaledInstance(20,20,Image.SCALE_DEFAULT));
+		initService();
+		System.out.println("Finish the init service");
 		this.init(list);
     }
+	public void initService(){
+		try {
+			categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
+			goodsService = (GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
+		} catch (MalformedURLException | RemoteException | NotBoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+	}
 	public void init(List<Category> list)
 	{
 		objects = new String[]{
@@ -80,22 +94,13 @@ public class GoodsCategoryFrame extends CategoryFrame
                 }
                 toAdd.setPrefer_id(selected.getCate_id());
                 try {
-    				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
     				if (categoryService.categoryHasGoods(selected.getCate_id())){
     					CommonUtil.showError("不能在该分类下添加子分类，该分类下有商品存在");
     					return;
     				}
     				toAdd.setCate_id(categoryService.addCategory(toAdd));
     				insertField.setText("");
-    			} catch (MalformedURLException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
     			} catch (RemoteException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
-    			} catch (NotBoundException e1) {
     				// TODO Auto-generated catch block
     				e1.printStackTrace();
     				CommonUtil.showError("网络连接错误");
@@ -125,22 +130,13 @@ public class GoodsCategoryFrame extends CategoryFrame
 			}
 			toDelete = (GoodsCategory) clickNode.getUserObject();
             try {
-				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
 				if (categoryService.categoryHasGoods(toDelete.getCate_id())){
 					CommonUtil.showError("不能删除该分类,该分类还有商品存在");
 					return;
 				}
 				categoryService.delCategory(toDelete);
 				clickNode.removeFromParent();
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				CommonUtil.showError("网络连接错误");
 			} catch (RemoteException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				CommonUtil.showError("网络连接错误");
-			} catch (NotBoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				CommonUtil.showError("网络连接错误");
@@ -166,20 +162,11 @@ public class GoodsCategoryFrame extends CategoryFrame
                 String tmpCateName = toUpdate.getCate_name();
                 toUpdate.setCate_name(updateField.getText());
                 try {
-    				CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
     				if(!categoryService.updateCategory(toUpdate)){
     					toUpdate.setCate_name(tmpCateName);
     					CommonUtil.showError("更新失败");
     				}
-    			} catch (MalformedURLException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
     			} catch (RemoteException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
-    			} catch (NotBoundException e1) {
     				// TODO Auto-generated catch block
     				e1.printStackTrace();
     				CommonUtil.showError("网络连接错误");
@@ -210,21 +197,12 @@ public class GoodsCategoryFrame extends CategoryFrame
 			if(clickNode.isLeaf()){
 				int cateId = selected.getCate_id();
 				try{
-					GoodsControllerInterface goodsService = (GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
 					Vector<Goods> goodList = goodsService.getAllGoodsByCateId(cateId);
 					if(goodList != null){
 						CommonUtil.updateJTable(table, objects, goodList.toArray(), fieldsToShow);
 					}
 					table.repaint();
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					CommonUtil.showError("网络连接错误");
 				} catch (RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					CommonUtil.showError("网络连接错误");
-				} catch (NotBoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					CommonUtil.showError("网络连接错误");

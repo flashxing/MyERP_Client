@@ -1,4 +1,4 @@
-package com.njue.mis;
+package com.njue.mis.client;
 import javax.swing.JFrame;
 
 import com.njue.mis.view.CategoryFrame;
@@ -8,6 +8,7 @@ public class MIS
 {
 	public static void main(String[] args)
 	{
+		Configure.init();
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		@SuppressWarnings("unused")
 //		CategoryFrame cate = new CategoryFrame();
