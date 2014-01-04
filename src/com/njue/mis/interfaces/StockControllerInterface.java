@@ -2,6 +2,7 @@ package com.njue.mis.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Vector;
 
 import com.njue.mis.model.Stock;
@@ -21,4 +22,5 @@ public interface StockControllerInterface extends Remote{
 	
 	public Stock getStock(int shId, String goodsId) throws RemoteException;
 	
+	public List<Stock> searchStocksByTime(String[] goodsIds, String time) throws RemoteException;
 }

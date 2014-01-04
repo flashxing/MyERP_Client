@@ -10,7 +10,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -33,7 +32,7 @@ public class GoodsCategoryFrame extends CategoryFrame
 	private static final long serialVersionUID = 1446389238639775488L;
 	private CategoryControllerInterface categoryService;
 	private GoodsControllerInterface goodsService;
-	
+	private List<Goods> goodsList;
 	public GoodsCategoryFrame(List<Category> list)
 	{
 		super("商品管理",list);
@@ -55,10 +54,10 @@ public class GoodsCategoryFrame extends CategoryFrame
 	public void init(List<Category> list)
 	{
 		objects = new String[]{
-				"商品编码","商品名称","型号","规格","数量","零售价","最近销售价","最近进价"
+				"商品编码","商品名称","型号","规格","数量","进价","零售价","最近销售价","最近进价"
 		};
 		fieldsToShow = new String[]{
-				"productCode","goodsName","description","size","goodsNum","price","lastSalePrice","lastStockPrice"
+				"productCode","goodsName","description","size","goodsNum","price","salesPrice","lastSalePrice","lastStockPrice"
 		};
 		super.init(list);
 		addGoodsButton.addActionListener(new ActionListener() {
@@ -73,6 +72,21 @@ public class GoodsCategoryFrame extends CategoryFrame
 				GoodsFrame goodsFrame = new GoodsFrame(selected.getCate_id());
 				MainFrame.getMainFrame().getContentPane().add(goodsFrame);
 				goodsFrame.setVisible(true);
+			}
+		});		
+		updateEntityButton.setText("更新商品");
+		updateEntityButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				int index = table.getSelectedRow();
+				if(index<0||goodsList==null||index>=goodsList.size()||goodsList.get(index)==null){
+					CommonUtil.showError("请选择一个客户");
+					return;
+				}else{
+					GoodsFrame goodsFrame = new GoodsFrame(goodsList.get(index));
+					MainFrame.getMainFrame().getContentPane().add(goodsFrame);
+					goodsFrame.setVisible(true);
+				}
 			}
 		});
         addButton.addActionListener( new ActionListener(){
@@ -197,9 +211,9 @@ public class GoodsCategoryFrame extends CategoryFrame
 			if(clickNode.isLeaf()){
 				int cateId = selected.getCate_id();
 				try{
-					Vector<Goods> goodList = goodsService.getAllGoodsByCateId(cateId);
-					if(goodList != null){
-						CommonUtil.updateJTable(table, objects, goodList.toArray(), fieldsToShow);
+					goodsList = goodsService.getAllGoodsByCateId(cateId);
+					if(goodsList != null){
+						CommonUtil.updateJTable(table, objects, goodsList.toArray(), fieldsToShow);
 					}
 					table.repaint();
 				} catch (RemoteException e1) {

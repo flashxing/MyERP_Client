@@ -108,7 +108,7 @@ public class MainFrame extends JFrame
 //			menuItem.addActionListener(MainAction.salesBack());
 //			menu.add(menuItem);
 			menuItem = new JMenuItem("业务单稿");
-			menuItem.addActionListener(MainAction.salesBack());
+			menuItem.addActionListener(MainAction.salesDraft());
 			menu.add(menuItem);
 		}
 		if(CommonUtil.hasPermisson(user, "查询管理")){
@@ -208,6 +208,10 @@ public class MainFrame extends JFrame
 			
 			menuItem = new JMenuItem("进货统计");
 			menuItem.addActionListener(MainAction.inPortStatistics());
+			menu.add(menuItem);
+			
+			menuItem = new JMenuItem("经营历程");
+			menuItem.addActionListener(MainAction.allStatistics());
 			menu.add(menuItem);
 		}
 

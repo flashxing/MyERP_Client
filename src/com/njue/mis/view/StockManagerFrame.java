@@ -38,6 +38,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.CustomerButton;
 import com.njue.mis.common.DateChooserJButton;
@@ -51,6 +52,7 @@ import com.njue.mis.interfaces.GoodsControllerInterface;
 import com.njue.mis.interfaces.GoodsItemControllerInterface;
 import com.njue.mis.interfaces.PortControllerInterface;
 import com.njue.mis.interfaces.SalesControllerInterface;
+import com.njue.mis.interfaces.StockControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Category;
 import com.njue.mis.model.Customer;
@@ -61,6 +63,7 @@ import com.njue.mis.model.GoodsItem;
 import com.njue.mis.model.PortIn;
 import com.njue.mis.model.SalesGoodsItem;
 import com.njue.mis.model.SalesIn;
+import com.njue.mis.model.Stock;
 import com.njue.mis.model.StockManagerObject;
 import com.njue.mis.model.StoreHouse;
 
@@ -80,8 +83,10 @@ public class StockManagerFrame extends JInternalFrame
     private GoodsCategory selected;
     
     private JTable table;
-    private String[] columns = {"商品名称","销售总数","销售均价","销售总价","进货总数","进货均价","进货总价"};
-    private String[] fields = {"goodsName","salesNumber","salesPrice","totalSalesMoney","portNumber","portPrice","totalPortMoney"};
+    private String[] columns = {"商品名称","销售总数","销售均价","销售总价","进货总数","进货均价","进货总价","库存数量","库存均价","库存总额"};
+    private String[] fields = {"goodsName","salesNumber","salesPrice",
+    		"totalSalesMoney","portNumber","portPrice","totalPortMoney",
+    		"stockNumber", "stockPrice", "stockMoney"};
     private JScrollPane goodScrollPane;
     
 
@@ -94,6 +99,7 @@ public class StockManagerFrame extends JInternalFrame
     private PortControllerInterface portService;
     private GoodsControllerInterface goodsService;
     private GoodsItemControllerInterface goodsItemService;
+    private StockControllerInterface stockService;
     private List<Goods> goodsList;
     private List<SalesIn> salesInList;
     private List<PortIn> portInList;
@@ -105,18 +111,11 @@ public class StockManagerFrame extends JInternalFrame
 		init();
 	}
 	public void init(){
-		try {
-			salesService = (SalesControllerInterface) Naming.lookup(Configure.SalesController);
-			portService = (PortControllerInterface) Naming.lookup(Configure.PortInController);
-			goodsService = (GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
-			goodsItemService = (GoodsItemControllerInterface) Naming.lookup(Configure.GoodsItemController);
-		} catch (MalformedURLException | RemoteException
-				| NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			CommonUtil.showError("网络错误");
-			return;
-		}
+		stockService = RemoteService.stockService;
+		salesService = RemoteService.salesService;
+		portService = RemoteService.portService;
+		goodsService = RemoteService.goodsService;
+		goodsItemService = RemoteService.goodsItemService;
 		initPanel();
 	}
 	
@@ -201,6 +200,7 @@ public class StockManagerFrame extends JInternalFrame
 			try {
 				List<List<SalesGoodsItem>> salesInList = goodsItemService.getSalesGoodsItemByTimeAndGoods(beginTime, endTime, goodsIds);
 				List<List<GoodsItem>> portList = goodsItemService.getPortGoodsItemByTimeAndGoods(beginTime, endTime, goodsIds);
+				List<Stock> stockList = stockService.searchStocksByTime(goodsIds, endTime);
 				List<StockManagerObject> stockManagerObjects = new ArrayList<>();
 				for(int i = 0 ;i < goodsList.size(); ++i){
 					String goodsName = goodsList.get(i).getGoodsName();
@@ -222,7 +222,12 @@ public class StockManagerFrame extends JInternalFrame
 					}
 					portPrice = totalPortMoney/portNumber;
 					
-					StockManagerObject object = new StockManagerObject(goodsName, salesNumber, salesPrice, totalSalesMoney, portNumber, portPrice, totalPortMoney);					
+					int stockNumber = stockList.get(i).getNumber();
+					double stockPrice = stockList.get(i).getPrice();
+					double stockMoney = stockNumber*stockPrice;
+					System.out.println(stockNumber+" "+stockMoney);
+					StockManagerObject object = new StockManagerObject(goodsName, salesNumber, salesPrice, totalSalesMoney,
+							portNumber, portPrice, totalPortMoney, stockNumber, stockPrice, stockMoney);					
 					stockManagerObjects.add(object);
 				}
 				CommonUtil.updateJTable(table, columns, stockManagerObjects.toArray(), fields);

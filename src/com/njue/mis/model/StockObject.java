@@ -1,6 +1,8 @@
 package com.njue.mis.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StockObject implements Serializable{
 	/**
@@ -16,14 +18,15 @@ public class StockObject implements Serializable{
 	public String time;  //赠送时间
 	public String operatePerson;  //操作员
 	public String comment;  //注释
+	public List<StockItem> stockItems;
 	public StockObject()
 	{
 		super();
-		// TODO Auto-generated constructor stub
+		stockItems = new ArrayList<>();
 	}
 	public StockObject(String id, String receiver, String goodsId, int storeHouseId,
 			int number, double price, String time, String operatePerson,
-			String comment)
+			String comment, List<StockItem> stockItems)
 	{
 		super();
 		this.id = id;
@@ -34,6 +37,7 @@ public class StockObject implements Serializable{
 		this.operatePerson = operatePerson;
 		this.comment = comment;
 		this.storeHouseId = storeHouseId;
+		this.stockItems = stockItems;
 	}
 	public String getId()
 	{
@@ -110,4 +114,11 @@ public class StockObject implements Serializable{
 	public void setReceiver(String receiver) {
 		this.receiver = receiver;
 	}
+	public List<StockItem> getStockItems() {
+		return stockItems;
+	}
+	public void setStockItems(List<StockItem> stockItems) {
+		this.stockItems = stockItems;
+	}
+	
 }

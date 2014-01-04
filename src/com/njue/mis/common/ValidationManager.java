@@ -52,7 +52,7 @@ public abstract class ValidationManager
 	 */
 	public static boolean validatePhone(String phone)
 	{
-		String eL= "(\\(\\d{3}\\)|\\d{3}-|\\d{4}-|\\(\\d{4}\\))?\\d{8}"; 
+		String eL= "((\\d{11})|^((\\d{7,8})|(\\d{4}|\\d{3})-(\\d{7,8})|(\\d{4}|\\d{3})-(\\d{7,8})-(\\d{4}|\\d{3}|\\d{2}|\\d{1})|(\\d{7,8})-(\\d{4}|\\d{3}|\\d{2}|\\d{1}))$)"; 
 		Pattern p = Pattern.compile(eL);
 		Matcher m = p.matcher(phone);    
         boolean result = m.matches();   
@@ -78,7 +78,7 @@ public abstract class ValidationManager
 	 */
 	public static boolean validatePrice(String price)
 	{
-		String eL= "\\d+(.\\d+)?"; 
+		String eL= "\\d+(.\\d+)"; 
 		Pattern p = Pattern.compile(eL);
 		Matcher m = p.matcher(price);    
         boolean result = m.matches();   

@@ -10,6 +10,9 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
+import com.njue.mis.model.Goods;
+import com.njue.mis.model.ReceiptItem;
+
 /**
  * 自定义一个往列里边添加按钮的单元格编辑器。最好继承DefaultCellEditor，不然要实现的方法就太多了。
  * 
@@ -79,9 +82,11 @@ public class MyButtonEditor extends DefaultCellEditor
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
     {
-        // 只为按钮赋值即可。也可以作其它操作。
-        this.button.setText(value == null ? "" : String.valueOf(value));
-
+    	if(value != null){
+    		this.button.setText(((ReceiptItem) value).getItem()); 
+    	}else{
+    		this.button.setText("");
+    	}
         return this.button;
     }
 
@@ -91,7 +96,7 @@ public class MyButtonEditor extends DefaultCellEditor
     @Override
     public Object getCellEditorValue()
     {
-        return this.button.getText();
+        return this.button.getReceiptItem();
     }
     
     public ReceiptItemButton getButton(){

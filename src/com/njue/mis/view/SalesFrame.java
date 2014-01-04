@@ -6,48 +6,34 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.CustomerButton;
-import com.njue.mis.common.GoodsItemPanel;
 import com.njue.mis.common.SalesGoodsItemPanel;
-import com.njue.mis.interfaces.CustomerControllerInterface;
+import com.njue.mis.common.SalesManButton;
 import com.njue.mis.interfaces.DiscountControllerInterface;
-import com.njue.mis.interfaces.GoodsControllerInterface;
 import com.njue.mis.interfaces.SalesControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.Discount;
-import com.njue.mis.model.Goods;
-import com.njue.mis.model.GoodsItem;
 import com.njue.mis.model.SalesGoodsItem;
 import com.njue.mis.model.SalesIn;
+import com.njue.mis.model.SalesMan;
 import com.njue.mis.model.StoreHouse;
 
 
@@ -61,9 +47,9 @@ public class SalesFrame extends JInternalFrame
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
 	private JTextField salesIdField;
-	private JTextField numberField;
 	private JTextField operatorField;
 	private CustomerButton customerButton;
+	private SalesManButton salesManButton;
 	private SalesGoodsItemPanel goodsPanel;
 	private JComboBox<StoreHouse> storeHouseComboBox;
 	
@@ -83,7 +69,7 @@ public class SalesFrame extends JInternalFrame
 	
 	public SalesFrame()
 	{
-		super("销售单",true,true,true,true);
+		super("销售出货单",true,true,true,true);
 		date = new Date();
 		init();
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
@@ -129,6 +115,10 @@ public class SalesFrame extends JInternalFrame
 		customerButton = new CustomerButton("。。。");
 		panel5.add(customerLabel);
 		panel5.add(customerButton);
+		JLabel salesManLabel = new JLabel("业务员:");
+		salesManButton = new SalesManButton("。。。");
+		panel5.add(salesManLabel);
+		panel5.add(salesManButton);
 		JLabel operatorLabel = new JLabel("操作员:");
 		operatorField = new JTextField(10);
 		operatorField.setText(MainFrame.username);
@@ -151,17 +141,25 @@ public class SalesFrame extends JInternalFrame
 		
 		resetData();
 		goodsPanel = new SalesGoodsItemPanel(salesIdField.getText());
-		
+		initDiscount();
 		JPanel panelCommit = new JPanel();
 		JButton commitButton = new JButton("提交");
+		JButton commitAsDraftButton = new JButton("存为草稿");
+		commitAsDraftButton.addActionListener(new AddAsDraftAction());
 		commitButton.addActionListener(new SalesAddListener());
 		panelCommit.add(commitButton);
+		panelCommit.add(commitAsDraftButton);
 		
 		panel.add(panel5, BorderLayout.NORTH);
 		panel.add(goodsPanel, BorderLayout.CENTER);
 		panel.add(panelCommit, BorderLayout.SOUTH);
 	
 		return panel;
+	}
+	private void initDiscount(){
+		discount = new Discount();
+		customerButton.setDiscount(discount);
+		goodsPanel.setDiscount(discount);
 	}
 	//设置部分控件为不可用状态
 	private void setEnableFalse()
@@ -257,7 +255,8 @@ public class SalesFrame extends JInternalFrame
 				CommonUtil.showError("请选择一个客户");
 				return;
 			}
-			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList();
+			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
+			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(shId);
 			if(list == null|| list.size() == 0){
 				CommonUtil.showError("请选中一个商品");
 				return;
@@ -273,7 +272,6 @@ public class SalesFrame extends JInternalFrame
 //			if(discount.getGoodsDiscount().containsKey(selectedGoods.getId())){
 //				dis = discount.getGoodsDiscount().get(selectedGoods.getId());
 //			}
-			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
 //			int number;
 //			try{
 //				number = Integer.parseInt(numberField.getText());
@@ -287,7 +285,17 @@ public class SalesFrame extends JInternalFrame
 //			}
 //			double money = price*number;
 //			String comment="";
-			SalesIn sales = new SalesIn(id,customer.getId(),"",0,goodsPanel.getMoney(),time,operator,"",0,0,shId,list);
+			if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
+				CommonUtil.showError("超过客户销售限额");
+				return;
+			}
+			SalesMan salesMan = salesManButton.getSalesMan();
+			String salesManName = "";
+			if(salesMan != null){
+				salesManName = salesMan.getName();
+			}
+			SalesIn sales = new SalesIn(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,"",0,
+					goodsPanel.getMoney(),goodsPanel.getDecreaseMoney(),shId, 1, salesManName, list);
 			try {
 				String result = salesHandler.addSalesIn(sales);
 				if(result == null){
@@ -302,6 +310,52 @@ public class SalesFrame extends JInternalFrame
 				CommonUtil.showError("网络错误");
 			}
 		}
+	}
+	
+	private class AddAsDraftAction implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Customer customer;
+			if((customer = customerButton.getCustomer())== null){
+				CommonUtil.showError("请选择一个客户");
+				return;
+			}
+			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
+			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(shId);
+			if(list == null|| list.size() == 0){
+				CommonUtil.showError("请选中一个商品");
+				return;
+			}
+			String id = salesIdField.getText();
+			String time = timeField.getText();
+			String operator = operatorField.getText();
+			if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
+				CommonUtil.showError("超过客户销售限额");
+				return;
+			}			
+			SalesMan salesMan = salesManButton.getSalesMan();
+			String salesManName = "";
+			if(salesMan != null){
+				salesManName = salesMan.getName();
+			}
+			SalesIn sales = new SalesIn(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,"",0,
+					goodsPanel.getMoney(),goodsPanel.getDecreaseMoney(),shId, 0, salesManName, list);
+			try {
+				String result = salesHandler.addSalesIn(sales);
+				if(result == null){
+					CommonUtil.showError("添加销售单失败,可能库存不足");
+					return;
+				}
+				resetData();
+				goodsPanel.clearData();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				CommonUtil.showError("网络错误");
+			}
+		}
+		
 	}
 	
 }

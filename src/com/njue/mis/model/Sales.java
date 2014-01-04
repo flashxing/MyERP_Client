@@ -18,13 +18,16 @@ public abstract class Sales implements Serializable
 	public String customerId;  //客户编号
 	public String goodsId;  //商品编号
 	public int number;  //数量
-	public double price;  //价格
 	public String time;  //时间
 	public String operatePerson; //操作员  
 	public String comment;  //注释
 	public double discount;
 	public double totalPrice;
+	public double decreasePrice;
+	public double price;  //价格
 	public int shId;
+	public int isPublished;
+	public String salesMan;
 	public List<SalesGoodsItem> goodsItemsList;
 	public double getDiscount() {
 		return discount;
@@ -58,7 +61,8 @@ public abstract class Sales implements Serializable
 
 	public Sales(String id, String customerId, String goodsId, 
 			int number, double price, String time, String operatePerson,
-			String comment,double discount, double totalPrice, int shId, List<SalesGoodsItem> goodsItemList)
+			String comment,double discount, double totalPrice, double decreasePrice, int shId,
+			int isPublished, String salesMan, List<SalesGoodsItem> goodsItemList)
 	{
 		super();
 		this.id = id;
@@ -71,7 +75,10 @@ public abstract class Sales implements Serializable
 		this.comment = comment;
 		this.discount = discount;
 		this.totalPrice = totalPrice;
+		this.decreasePrice = decreasePrice;
 		this.shId = shId;
+		this.isPublished = isPublished;
+		this.salesMan = salesMan;
 		this.goodsItemsList = goodsItemList;
 	}
 
@@ -146,4 +153,29 @@ public abstract class Sales implements Serializable
 	public void setGoodsItemsList(List<SalesGoodsItem> goodsItemList) {
 		this.goodsItemsList = goodsItemList;
 	}
+
+	public double getDecreasePrice() {
+		return decreasePrice;
+	}
+
+	public void setDecreasePrice(double decreasePrice) {
+		this.decreasePrice = decreasePrice;
+	}
+
+	public int getIsPublished() {
+		return isPublished;
+	}
+
+	public void setIsPublished(int isPublished) {
+		this.isPublished = isPublished;
+	}
+
+	public String getSalesMan() {
+		return salesMan;
+	}
+
+	public void setSalesMan(String salesMan) {
+		this.salesMan = salesMan;
+	}
+	
 }

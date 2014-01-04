@@ -11,6 +11,11 @@ import java.util.List;
 public class SalesIn extends Sales
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3586454332510730208L;
+
 	public SalesIn()
 	{
 		super();
@@ -18,11 +23,12 @@ public class SalesIn extends Sales
 
 	public SalesIn(String id, String customerId, String goodsId,
 			int number, double price, String time,
-			String operatePerson, String comment,double discount, double totalPrice, int shId,
+			String operatePerson, String comment,double discount, double totalPrice,
+			Double decreasePrice,int shId, int isPublished, String salesMan,
 			List<SalesGoodsItem> goodsItemsList)
 	{
 		super(id, customerId, goodsId, number, price, time, operatePerson,
-				comment, discount, totalPrice, shId, goodsItemsList);
+				comment, discount, totalPrice, decreasePrice, shId, isPublished, salesMan, goodsItemsList);
 	}
 	
 	public SalesIn clone(){
@@ -32,6 +38,6 @@ public class SalesIn extends Sales
 		}
 		return new SalesIn(id, customerId, goodsId,
 			number, price, time, operatePerson,
-			comment, discount, totalPrice, shId, list);
+			comment, discount, totalPrice, decreasePrice, shId, isPublished, salesMan, list);
 	}
 }

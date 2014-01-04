@@ -20,9 +20,11 @@ import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -97,6 +99,8 @@ public class GoodsButton extends JButton{
 	    
 	    protected DefaultMutableTreeNode clickNode;
 	    private GoodsCategory selected;
+	    private JTextField nameField;
+	    private JButton searchButton;
 	    public GoodsChooser(){
 			super();
 			init();
@@ -156,7 +160,18 @@ public class GoodsButton extends JButton{
 	        goodScrollPane.setViewportView(table);
 	        goodScrollPane.setPreferredSize(new Dimension(screenSize.width * 2 / 3,
 					screenSize.height * 1/80));
-	        add(goodScrollPane, BorderLayout.CENTER);
+	        JPanel searchPanel = new JPanel();
+	        JLabel nameLabel = new JLabel("商品名称");
+	        nameField = new JTextField(10);
+	        searchButton = new JButton("查询");
+	        searchButton.addActionListener(new SearchAction());
+	        searchPanel.add(nameLabel);
+	        searchPanel.add(nameField);
+	        searchPanel.add(searchButton);
+	        JPanel rightPanel = new JPanel(new BorderLayout());
+	        rightPanel.add(searchPanel, BorderLayout.NORTH);
+	        rightPanel.add(goodScrollPane, BorderLayout.CENTER);
+	        add(rightPanel, BorderLayout.CENTER);
 	        add(scrollPane,BorderLayout.WEST);
 		}
 		@Override
@@ -241,7 +256,26 @@ public class GoodsButton extends JButton{
 				
 			}
 	    }
+		private class SearchAction implements ActionListener{
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String goodsName = nameField.getText();
+				if(goodsName.length()<=0){
+					CommonUtil.showError("搜索关键词不能为空");
+					return;
+				}
+				try {
+					goodsList = goodsService.getAllGoodsByGoodsName(goodsName);
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				CommonUtil.updateJTable(table, columns, goodsList.toArray(), fields);
+			}
+		}
 
 	}
+
 
 }

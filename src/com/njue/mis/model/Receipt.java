@@ -14,24 +14,21 @@ public class Receipt implements Serializable{
 	public Double money;
 	public String time;
 	public String operator;
+	public String cardName;
 	public String comment;
 	public List<ReceiptItemDetail> receiptItemDetailList;
-	public List<ReceiptItemDetail> getReceiptItemDetailList() {
-		return receiptItemDetailList;
-	}
-	public void setReceiptItemDetailList(
-			List<ReceiptItemDetail> receiptItemDetailList) {
-		this.receiptItemDetailList = receiptItemDetailList;
-	}
+
 	public Receipt(){
 		
 	}
-	public Receipt(String id, String customerId, Double money, String time, String operator, String comment, List<ReceiptItemDetail> receiptItemDetailList){
+	public Receipt(String id, String customerId, Double money, String time, String operator, 
+			String cardName, String comment, List<ReceiptItemDetail> receiptItemDetailList){
 		this.id = id;
 		this.customerId = customerId;
 		this.money = money;
 		this.time = time;
 		this.operator = operator;
+		this.cardName = cardName;
 		this.comment = comment;
 		this.receiptItemDetailList = receiptItemDetailList;
 	}
@@ -65,18 +62,31 @@ public class Receipt implements Serializable{
 	public void setOperator(String operator) {
 		this.operator = operator;
 	}
+	
+	public String getCardName() {
+		return cardName;
+	}
+	public void setCardName(String cardName) {
+		this.cardName = cardName;
+	}
 	public String getComment() {
 		return comment;
 	}
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
+	public List<ReceiptItemDetail> getReceiptItemDetailList() {
+		return receiptItemDetailList;
+	}
+	public void setReceiptItemDetailList(
+			List<ReceiptItemDetail> receiptItemDetailList) {
+		this.receiptItemDetailList = receiptItemDetailList;
+	}
 	public Receipt clone(){
 		List<ReceiptItemDetail> list = new ArrayList<ReceiptItemDetail>();
 		for(ReceiptItemDetail itemDetail: receiptItemDetailList){
 			list.add(itemDetail.clone());
 		}
-		return new Receipt(id, customerId, money, time, operator, comment, list);
+		return new Receipt(id, customerId, money, time, operator, cardName, comment, list);
 	}
 }

@@ -16,7 +16,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -34,16 +33,18 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
 import com.njue.mis.interfaces.CategoryControllerInterface;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.model.Category;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.CustomerCategory;
+import com.njue.mis.model.Discount;
 
 public class CustomerButton extends JButton{
-	private String customerId;
 	private Customer customer;
 	private CustomerChooser customerChooser;
+	private Discount discount;
 	public CustomerButton(String text){
 		super(text);
 		this.setSize(5, 20);
@@ -144,6 +145,15 @@ public class CustomerButton extends JButton{
 					if(index>=0 && customerList!=null &&index<customerList.size()){
 						Customer customer = customerList.get(index);
 						setCustomer(customer);
+						if(discount!=null){
+							try {
+								Discount userDiscount = RemoteService.discountService.getDiscount(customer.getId());
+								discount.update(userDiscount);
+							} catch (RemoteException e1) {
+								e1.printStackTrace();
+								CommonUtil.showError("网络错误，不能获取用户折扣信息");
+							}
+						}
 					}
 				}
 			});
@@ -239,6 +249,10 @@ public class CustomerButton extends JButton{
 			}
 	    }
 
+	}
+	
+	public void setDiscount(Discount discount){
+		this.discount = discount;
 	}
 
 }

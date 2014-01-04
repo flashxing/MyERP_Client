@@ -22,11 +22,12 @@ public class SalesBack extends Sales
 
 	public SalesBack(String id, String customerId, String goodsId,
 			int number, double price, String time,
-			String operatePerson, String comment,double discount, double totalPrice, int shId,
+			String operatePerson, String comment,double discount, double totalPrice,
+			Double decreasePrice, int shId, int isPublished, String salesMan,
 			List<SalesGoodsItem> goodsItemsList)
 	{
 		super(id, customerId, goodsId, number, price, time, operatePerson,
-				comment, discount, totalPrice, shId, goodsItemsList);
+				comment, discount, totalPrice, decreasePrice, shId, isPublished, salesMan, goodsItemsList);
 	}
 	public SalesBack clone(){
 		List<SalesGoodsItem> list = new ArrayList<SalesGoodsItem>();
@@ -35,7 +36,7 @@ public class SalesBack extends Sales
 		}
 		return new SalesBack(id, customerId, goodsId,
 			number, price, time, operatePerson,
-			comment, discount, totalPrice, shId, list);
+			comment, discount, totalPrice, decreasePrice, shId, isPublished, salesMan, list);
 	}
 
 }

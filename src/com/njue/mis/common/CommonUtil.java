@@ -3,6 +3,7 @@ package com.njue.mis.common;
 import java.awt.Component;
 import java.io.ObjectInputStream.GetField;
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -29,7 +31,7 @@ import com.njue.mis.model.Role;
 import com.njue.mis.model.User;
 
 public class CommonUtil {
-	
+	private static DecimalFormat df=new DecimalFormat(".##");
 	/*
 	 * to update the JTable
 	 */
@@ -418,7 +420,23 @@ public class CommonUtil {
             TableColumn col = table.getColumn(table.getColumnName(i));     
             col.setCellRenderer(d);     
         }     
-    } 
+    }
+    
+    public static double getDoubleFromTextField(JTextField textField){
+    	double result = 0.0;
+    	try{
+    		System.out.println(textField.getText());
+    		result = Double.parseDouble(df.format(Double.parseDouble(textField.getText())));
+    	}catch (Exception ex){
+    		ex.printStackTrace();
+    		return -1;
+    	}
+    	return result;
+    }
+    
+    public static double formateDouble(double number){
+    	return Double.parseDouble(df.format(number));
+    }
 	
 //	public static void main(String[] args){
 //		Goods good1 = new Goods();

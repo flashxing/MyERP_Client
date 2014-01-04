@@ -270,6 +270,21 @@ public class MainAction
 		}; 
 	}
 	
+	public static ActionListener salesDraft()
+	{
+		return new ActionListener()
+		{
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				SalesDraftFrame salesDraftFrame = new SalesDraftFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						salesDraftFrame);
+				salesDraftFrame.setVisible(true);
+			}
+		}; 
+	}
+	
 	public static ActionListener priceChange()
 	{
 		return new ActionListener()
@@ -541,5 +556,17 @@ public class MainAction
 		};
 
 	}
-	
+	public static ActionListener allStatistics() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				AllStatisticFrame allStatisticFrame = new AllStatisticFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						allStatisticFrame);
+				allStatisticFrame.setVisible(true);
+			}
+		};
+
+	}
+
 }

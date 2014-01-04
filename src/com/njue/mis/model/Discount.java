@@ -1,18 +1,20 @@
 package com.njue.mis.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class Discount implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2909266157954044093L;
 	private String customerId;
 	private double discount;
 	private Map<String, Double> goodsDiscount = new HashMap<String,Double>();
 	public Discount(){
-		
+		discount = 1;
 	}
 	
 	public Discount(Discount discount){
@@ -49,5 +51,7 @@ public class Discount implements Serializable {
 		this.discount = discount.discount;
 		this.goodsDiscount = discount.goodsDiscount;
 	}
-
+	public Double getDiscount(String goodsId){
+		return goodsDiscount.get(goodsId)!=null?goodsDiscount.get(goodsId):discount;
+	}
 }

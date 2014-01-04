@@ -5,9 +5,6 @@ import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import javax.swing.JButton;
@@ -18,9 +15,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
-import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
 import com.njue.mis.common.CommonFactory;
-import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.ValidationManager;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.CustomerServicesHandler;
@@ -45,6 +41,7 @@ public class CustomerFrame extends JInternalFrame
 	JTextField customer_mailField;
 	JTextField customer_bankField;
 	JTextField customer_bankIDField;
+	JTextField customer_maxMoney;
 
 	JTextField custoField1;
 	JTextField customer_addressField1;
@@ -57,7 +54,9 @@ public class CustomerFrame extends JInternalFrame
 	JTextField customer_mailField1;
 	JTextField customer_bankField1;
 	JTextField customer_bankIDField1;
-
+	
+	private JButton saveButton;
+	private Customer customer;
 	private int cateId;
 	public CustomerFrame(int cateId)
 	{
@@ -69,17 +68,18 @@ public class CustomerFrame extends JInternalFrame
 				screenSize.width / 2, screenSize.height / 2);
 		this.getContentPane().add(createTabbedPane());
 	}
-	public boolean init()
+	public CustomerFrame(Customer customer){
+		super("客户信息管理", true, true, false, true);
+		init();
+		this.customer = customer;
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		this.setBounds(screenSize.width / 12, screenSize.height / 20,
+				screenSize.width / 2, screenSize.height / 2);
+		this.getContentPane().add(createTabbedPane());
+	}
+	public void init()
 	{
-		try {
-			customerService = (CustomerControllerInterface) Naming.lookup(Configure.CustomerController);
-			return true;
-		} catch (MalformedURLException | RemoteException | NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			CommonUtil.showError("网络错误");
-			return false;
-		}
+		customerService = RemoteService.customerService;
 	}
 	public JTabbedPane createTabbedPane()
 	{
@@ -117,6 +117,12 @@ public class CustomerFrame extends JInternalFrame
 
 		addpanel2.add(simple_custoField);
 
+		
+		JLabel maxMoneyLabel = new JLabel("最大额度:");
+		customer_maxMoney = new JTextField(10);
+		addpanel2.add(maxMoneyLabel);
+		addpanel2.add(customer_maxMoney);
+		
 		JPanel addpanel3 = new JPanel();
 		JLabel customer_addressLabel = new JLabel("客户地址:");
 		addpanel3.add(customer_addressLabel);
@@ -164,74 +170,7 @@ public class CustomerFrame extends JInternalFrame
 		addpanel7.add(customer_bankIDField);
 
 		JPanel addpanel8 = new JPanel();
-		JButton saveButton = new JButton("保存");
-		saveButton.addActionListener(new ActionListener()
-		{
-			
-			public void actionPerformed(ActionEvent e)
-			{
-				if (simple_custoField.getText().trim().length() == 0)
-				{
-					JOptionPane.showMessageDialog(null, "客户编号不能为空","警告",JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				if(custoField.getText().trim().length() == 0)
-				{
-					JOptionPane.showMessageDialog(null, "客户全称不能为空！","警告",JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				
-				if(customer_zipField.getText().length()!=0)
-				{
-					if (!ValidationManager.validateZip(customer_zipField.getText().trim()))
-					{
-						JOptionPane.showMessageDialog(null, "邮政编码不合法！","警告",JOptionPane.WARNING_MESSAGE);
-						return;
-					}
-				}
-				if(customer_teleField.getText().length()!=0)
-				{
-					if (!ValidationManager.validatePhone(customer_teleField.getText().trim()))
-					{
-						JOptionPane.showMessageDialog(null, "电话号码不合法！","警告",JOptionPane.WARNING_MESSAGE);
-						return;
-					}
-				}
-				if(customer_mailField.getText().length()!=0)
-				{
-					if (!ValidationManager.validateEmail(customer_mailField.getText().trim()))
-					{
-						JOptionPane.showMessageDialog(null, "电子邮件格式不合法！","警告",JOptionPane.WARNING_MESSAGE);
-						return;
-					}
-				}
-				try {
-					if (customerService.addCustomer(new Customer(simple_custoField
-							.getText(), custoField.getText(), customer_zipField
-							.getText(), customer_addressField.getText(),
-							customer_linktField.getText(), customer_faxField
-									.getText(), customer_linkpField.getText(),
-							customer_linktField.getText(), customer_mailField
-									.getText(), customer_bankField.getText(),
-							customer_bankIDField.getText(),1,cateId,new CustomerMoney(simple_custoField.getText(), 0, 0))) != null)
-					{
-						JOptionPane.showMessageDialog(null, "客户信息添加成功！", "消息",
-								JOptionPane.INFORMATION_MESSAGE);
-						setNull();
-					}
-					else
-					{
-						JOptionPane.showMessageDialog(null,
-								"客户信息添加失败，请按要求输入信息！", "警告",
-								JOptionPane.WARNING_MESSAGE);
-						setNull();
-					}
-				} catch (HeadlessException | RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
+		saveButton = new JButton("保存");
 		addpanel8.add(saveButton);
 
 		JButton reButton = new JButton("重置");
@@ -330,7 +269,6 @@ public class CustomerFrame extends JInternalFrame
 
 			}
 		});
-
 		JPanel deletepanel2 = new JPanel();
 		JLabel simple_custoLabel1 = new JLabel("客户全称:");
 		deletepanel2.add(simple_custoLabel1);
@@ -440,7 +378,8 @@ public class CustomerFrame extends JInternalFrame
 		deletePanel.add(deletepanel8);
 
 		tabbedPane.addTab("客户删除信息", deletePanel);
-
+		
+		testIfUpdate();
 		return tabbedPane;
 	}
 
@@ -458,5 +397,173 @@ public class CustomerFrame extends JInternalFrame
 		customer_bankField.setText("");
 		customer_bankIDField.setText("");
 		customer_teleField.setText("");
+		customer_maxMoney.setText("");
+	}
+	
+	private void testIfUpdate(){
+		if(customer!=null){
+			custoField.setText(customer.getName());
+			custoField.setEditable(false);
+			customer_addressField.setText(customer.getAddress());
+			simple_custoField.setText(customer.getId());
+			simple_custoField.setEditable(false);
+			customer_zipField.setText(customer.getZip());
+			customer_teleField.setText(customer.getTelephone());
+			customer_linkpField.setText(customer.getConnectionPerson());
+			customer_faxField.setText(customer.getFax());
+			customer_linktField.setText(customer.getPhone());
+			customer_mailField.setText(customer.getEmail());
+			customer_bankField.setText(customer.getBank());
+			customer_bankIDField.setText(customer.getAccount());
+			customer_maxMoney.setText(""+customer.getMaxMoney());
+			saveButton.setText("修改");
+			saveButton.addActionListener(new UpdateAction());
+		}else{
+			saveButton.addActionListener(new AddAction());
+		}
+	}
+	private class AddAction implements ActionListener{
+		public void actionPerformed(ActionEvent e)
+		{
+			if (simple_custoField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "客户编号不能为空","警告",JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if(custoField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "客户全称不能为空！","警告",JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			
+			if(customer_zipField.getText().length()!=0)
+			{
+				if (!ValidationManager.validateZip(customer_zipField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null, "邮政编码不合法！","警告",JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			if(customer_teleField.getText().length()!=0)
+			{
+				if (!ValidationManager.validatePhone(customer_teleField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null, "电话号码不合法！","警告",JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			if(customer_mailField.getText().length()!=0)
+			{
+				if (!ValidationManager.validateEmail(customer_mailField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null, "电子邮件格式不合法！","警告",JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			double maxMoney = 0;
+			try{
+				maxMoney =  Double.parseDouble(customer_maxMoney.getText());
+			}catch (Exception ex){
+				JOptionPane.showMessageDialog(null, "最大限额必须为数字！","警告",JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			try {
+				if (customerService.addCustomer(new Customer(simple_custoField
+						.getText(), custoField.getText(), customer_zipField
+						.getText(), customer_addressField.getText(),
+						customer_teleField.getText(), customer_faxField
+								.getText(), customer_linkpField.getText(),
+						customer_linktField.getText(), customer_mailField
+								.getText(), customer_bankField.getText(),
+						customer_bankIDField.getText(),1,cateId,maxMoney, new CustomerMoney(simple_custoField.getText(), 0, 0))) != null)
+				{
+					JOptionPane.showMessageDialog(null, "客户信息添加成功！", "消息",
+							JOptionPane.INFORMATION_MESSAGE);
+					setNull();
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null,
+							"客户信息添加失败，请按要求输入信息！", "警告",
+							JOptionPane.WARNING_MESSAGE);
+					setNull();
+				}
+			} catch (HeadlessException | RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+	}
+	private class UpdateAction implements ActionListener{
+		public void actionPerformed(ActionEvent e)
+		{
+			if (simple_custoField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "客户编号不能为空","警告",JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if(custoField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "客户全称不能为空！","警告",JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			
+			if(customer_zipField.getText().length()!=0)
+			{
+				if (!ValidationManager.validateZip(customer_zipField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null, "邮政编码不合法！","警告",JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			if(customer_teleField.getText().length()!=0)
+			{
+				if (!ValidationManager.validatePhone(customer_teleField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null, "电话号码不合法！","警告",JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			if(customer_mailField.getText().length()!=0)
+			{
+				if (!ValidationManager.validateEmail(customer_mailField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null, "电子邮件格式不合法！","警告",JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			double maxMoney = 0;
+			try{
+				maxMoney =  Double.parseDouble(customer_maxMoney.getText());
+			}catch (Exception ex){
+				JOptionPane.showMessageDialog(null, "最大限额必须为数字！","警告",JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			try {
+				customer.setAccount(customer_bankIDField.getText());
+				customer.setZip(customer_zipField.getText());
+				customer.setTelephone(customer_teleField.getText());
+				customer.setConnectionPerson(customer_linkpField.getText());
+				customer.setFax(customer_faxField.getText());
+				customer.setPhone(customer_linktField.getText());
+				customer.setEmail(customer_mailField.getText());
+				customer.setBank(customer_bankField.getText());
+				customer.setMaxMoney(maxMoney);
+				if (customerService.updateCustomer(customer))
+				{
+					JOptionPane.showMessageDialog(null, "客户信息更新成功！", "消息",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null,
+							"客户信息添加失败，请按要求输入信息！", "警告",
+							JOptionPane.WARNING_MESSAGE);
+				}
+			} catch (HeadlessException | RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 	}
 }

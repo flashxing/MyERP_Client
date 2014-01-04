@@ -4,9 +4,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import javax.swing.JButton;
@@ -16,8 +13,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.ValidationManager;
 import com.njue.mis.interfaces.GoodsControllerInterface;
@@ -38,6 +37,8 @@ public class GoodsFrame extends JInternalFrame
 	JTextField promitField;
 	JTextField decriptionField;
 	JTextField ID_privoderField;
+	private JTextField salesPriceField;
+	private JButton saveButton;
 
 	JTextField goodsField1;
 	JTextField ID_goodsField1;
@@ -51,17 +52,32 @@ public class GoodsFrame extends JInternalFrame
 	JTextField ID_privoderField1;
 	
 	private int cateId;
-
+	private Goods goods;
+	private GoodsControllerInterface goodsService;
 	public GoodsFrame(int cateId)
 	{
 		super("商品信息管理", true, true, false, true);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		init();
 		this.setBounds(screenSize.width / 12, screenSize.height / 20,
 				screenSize.width / 2, screenSize.height / 2);
 		this.getContentPane().add(createTabbedPane());
 		this.cateId = cateId;
+		
 	}
-
+	
+	public GoodsFrame(Goods goods){
+		super("商品信息管理", true, true, false, true);
+		init();
+		this.goods = goods;
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		this.setBounds(screenSize.width / 12, screenSize.height / 20,
+				screenSize.width / 2, screenSize.height / 2);
+		this.getContentPane().add(createTabbedPane());
+	}
+	public void init(){
+		goodsService = RemoteService.goodsService;
+	}
 	public JTabbedPane createTabbedPane()
 	{
 		/*
@@ -75,11 +91,11 @@ public class GoodsFrame extends JInternalFrame
 
 		goodsField = new JTextField(30);
 		ID_goodsField = new JTextField(13);
-		priceField = new JTextField(13);
+		priceField = new JTextField(10);
 		goodsdressField = new JTextField(30);
-		ID_privoderField = new JTextField(13);
-		packageField = new JTextField(13);
-		sizeField = new JTextField(13);
+		ID_privoderField = new JTextField(10);
+		packageField = new JTextField(10);
+		sizeField = new JTextField(10);
 		promitField = new JTextField(30);
 		decriptionField = new JTextField(30);
 
@@ -92,10 +108,35 @@ public class GoodsFrame extends JInternalFrame
 		JLabel ID_goodsLabel = new JLabel("商品编码*:");
 		addpanel2.add(ID_goodsLabel);
 		addpanel2.add(ID_goodsField);
-		JLabel priceLabel = new JLabel("单价*:");
+		JLabel priceLabel = new JLabel("进价*:");
 		addpanel2.add(priceLabel);
+		priceField.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
+				double price = CommonUtil.getDoubleFromTextField(priceField);
+				double salesPrice = CommonUtil.formateDouble(price*3);
+				salesPriceField.setText(salesPrice+"");
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+				double price = CommonUtil.getDoubleFromTextField(priceField);
+				double salesPrice = CommonUtil.formateDouble(price*3);
+				salesPriceField.setText(salesPrice+"");
+			}
+		});
 		addpanel2.add(priceField);
-
+		
+		JLabel salesPriceLabel = new JLabel("销价:");
+		salesPriceField = new JTextField(10);
+		addpanel2.add(salesPriceLabel);
+		addpanel2.add(salesPriceField);
+		
 		JPanel addpanel3 = new JPanel();
 		JLabel goodsdressLabel = new JLabel("产地:         ");
 		addpanel3.add(goodsdressLabel);
@@ -103,10 +144,6 @@ public class GoodsFrame extends JInternalFrame
 		addpanel3.add(goodsdressField);
 
 		JPanel addpanel4 = new JPanel();
-		JLabel ID_privoderLabel = new JLabel("供应商号:");
-		addpanel4.add(ID_privoderLabel);
-
-		addpanel4.add(ID_privoderField);
 		JLabel sizeLabel = new JLabel("规格:");
 		addpanel4.add(sizeLabel);
 
@@ -117,9 +154,6 @@ public class GoodsFrame extends JInternalFrame
 		addpanel5.add(packageLabel);
 
 		addpanel5.add(packageField);
-		JLabel productLabel = new JLabel("批号:");
-		addpanel5.add(productLabel);
-
 
 		JPanel addpanel6 = new JPanel();
 		JLabel promitLabel = new JLabel("批准文号:");
@@ -134,81 +168,7 @@ public class GoodsFrame extends JInternalFrame
 		addpanel7.add(decriptionField);
 
 		JPanel addpanel8 = new JPanel();
-		JButton saveButton = new JButton("保存");
-		saveButton.addActionListener(new ActionListener()
-		{
-			
-			public void actionPerformed(ActionEvent e)
-			{
-				// TODO Auto-generated method stub
-				if (goodsField.getText().trim().length() == 0)
-				{
-					JOptionPane.showMessageDialog(null, "商品全称不能为空！", "警告",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				if (ID_goodsField.getText().trim().length() == 0)
-				{
-					JOptionPane.showMessageDialog(null, "商品编号不能为空！", "警告",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				if (priceField.getText().trim().length() == 0)
-				{
-					JOptionPane.showMessageDialog(null,"商品价格不能为空！", "警告",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				if (priceField.getText().trim().length() != 0)
-				{
-					if (!ValidationManager.validatePrice(priceField.getText().trim()))
-					{
-						JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
-								JOptionPane.WARNING_MESSAGE);
-						return;
-					}
-				}
-				
-				try {
-    				GoodsControllerInterface goodsService = (GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
-    				Goods goods = new Goods(null,
-							goodsField.getText(), goodsdressField.getText(),
-							sizeField.getText(), packageField.getText(),
-							ID_goodsField.getText(), promitField.getText(),
-							decriptionField.getText(), Double
-									.valueOf(priceField.getText()),
-							ID_privoderField.getText());
-    				goods.setCateId(cateId);
-    				String goodsId = goodsService.addGoods(goods);
-    				
-    				if (goodsId != null)
-					{
-						JOptionPane.showMessageDialog(null, "商品信息添加成功！", "消息",
-								JOptionPane.INFORMATION_MESSAGE);
-						setNull();
-					}
-					else
-					{
-						JOptionPane.showMessageDialog(null,
-								"商品信息添加失败，请检查商品编码是否已存在！", "警告",
-								JOptionPane.WARNING_MESSAGE);
-						setNull();
-					}
-    			} catch (MalformedURLException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
-    			} catch (RemoteException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
-    			} catch (NotBoundException e1) {
-    				// TODO Auto-generated catch block
-    				e1.printStackTrace();
-    				CommonUtil.showError("网络连接错误");
-    			}
-			}
-		});
+		saveButton = new JButton("保存");
 		addpanel8.add(saveButton);
 		JButton reButton = new JButton("重置");
 		reButton.addActionListener(new ActionListener()
@@ -274,21 +234,7 @@ public class GoodsFrame extends JInternalFrame
 
 				else
 				{
-//					try {
-//	    				GoodsControllerInterface goodsService = (GoodsControllerInterface) Naming.lookup(Configure.GoodsController);
-//	    			} catch (MalformedURLException e1) {
-//	    				// TODO Auto-generated catch block
-//	    				e1.printStackTrace();
-//	    				CommonUtil.showError("网络连接错误");
-//	    			} catch (RemoteException e1) {
-//	    				// TODO Auto-generated catch block
-//	    				e1.printStackTrace();
-//	    				CommonUtil.showError("网络连接错误");
-//	    			} catch (NotBoundException e1) {
-//	    				// TODO Auto-generated catch block
-//	    				e1.printStackTrace();
-//	    				CommonUtil.showError("网络连接错误");
-//	    			}
+
 				}
 			}
 		});
@@ -356,16 +302,6 @@ public class GoodsFrame extends JInternalFrame
 				}
 				else
 				{
-//					GoodsServicesHandler goodsServicesHandler=CommonFactory.getGoodsServices();
-//					if(goodsServicesHandler.deleteGoods(ID_goodsField1.getText())){
-//						JOptionPane.showMessageDialog(null, "恭喜你，删除成功！", "消息",
-//								JOptionPane.INFORMATION_MESSAGE);
-//						ID_goodsField1.setEditable(true);
-//					}
-//					else{
-//						JOptionPane.showMessageDialog(null, "对不起，删除失败！", "警告",
-//								JOptionPane.WARNING_MESSAGE);
-//					}
 				}
 				
 			}
@@ -393,20 +329,173 @@ public class GoodsFrame extends JInternalFrame
 		deletePanel.add(deletepanel8);
 
 		tabbedPane.addTab("商品删除信息", deletePanel);
-
+		testIfUpdate();
 		return tabbedPane;
 	}
 
 	private void setNull()
 	{
-		ID_goodsField.setText("");
 		goodsField.setText("");
+		ID_goodsField.setText("");
 		goodsdressField.setText("");
 		sizeField.setText("");
 		packageField.setText("");
 		promitField.setText("");
 		decriptionField.setText("");
 		priceField.setText("");
-		ID_privoderField.setText("");
+		salesPriceField.setText("");
+	}
+	private void testIfUpdate(){
+		if(goods!=null){
+			goodsField.setText(goods.getGoodsName());
+			goodsField.setEditable(false);
+			ID_goodsField.setText(goods.getProductCode());
+			ID_goodsField.setEditable(false);
+			priceField.setText(goods.getPrice()+"");
+			goodsdressField.setText(goods.getProducePlace());
+			packageField.setText(goods.get_package());
+			sizeField.setText(goods.getSize());
+			promitField.setText(goods.getPromitCode());
+			decriptionField.setText(goods.getDescription());
+			ID_privoderField.setText(goods.getProviderId());
+			saveButton.setText("修改");
+			saveButton.addActionListener(new UpdateAction());
+		}else{
+			saveButton.addActionListener(new AddAction());
+		}
+	}
+	private class AddAction implements ActionListener{
+		
+		public void actionPerformed(ActionEvent e)
+		{
+			// TODO Auto-generated method stub
+			if (goodsField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "商品全称不能为空！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (ID_goodsField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "商品编号不能为空！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (priceField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null,"商品价格不能为空！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (priceField.getText().trim().length() != 0)
+			{
+				if (!ValidationManager.validatePrice(priceField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
+							JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			
+			double price = CommonUtil.getDoubleFromTextField(priceField);
+			if (price < 0){
+				JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			double salesPrice = CommonUtil.getDoubleFromTextField(salesPriceField);
+			if (salesPrice < 0){
+				JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			salesPrice = CommonUtil.formateDouble(salesPrice);
+			try {
+						Goods goods = new Goods(null,
+						goodsField.getText(), goodsdressField.getText(),
+						sizeField.getText(), packageField.getText(),
+						ID_goodsField.getText(), promitField.getText(),
+						decriptionField.getText(), price, salesPrice,
+						ID_privoderField.getText());
+				goods.setCateId(cateId);
+				String goodsId = goodsService.addGoods(goods);
+				
+				if (goodsId != null)
+				{
+					JOptionPane.showMessageDialog(null, "商品信息添加成功！", "消息",
+							JOptionPane.INFORMATION_MESSAGE);
+					setNull();
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null,
+							"商品信息添加失败，请检查商品编码是否已存在！", "警告",
+							JOptionPane.WARNING_MESSAGE);
+					setNull();
+				}
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				CommonUtil.showError("网络连接错误");
+			} 
+		}
+	}
+	private class UpdateAction implements ActionListener{
+		public void actionPerformed(ActionEvent e)
+		{
+			if (priceField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null,"商品价格不能为空！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (priceField.getText().trim().length() != 0)
+			{
+				if (!ValidationManager.validatePrice(priceField.getText().trim()))
+				{
+					JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
+							JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+			}
+			
+			double price = CommonUtil.getDoubleFromTextField(priceField);
+			if (price < 0){
+				JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}			
+			double salesPrice = CommonUtil.getDoubleFromTextField(salesPriceField);
+			if (salesPrice < 0){
+				JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			salesPrice = CommonUtil.formateDouble(salesPrice);
+			try {
+				goods.setProducePlace(goodsdressField.getText());
+				goods.setSize(sizeField.getText());
+				goods.set_package(packageField.getText());
+				goods.setPromitCode(promitField.getText());
+				goods.setDescription(decriptionField.getText());
+				goods.setPrice(price);
+				goods.setSalesPrice(salesPrice);
+				if (goodsService.updateGoods(goods))
+				{
+					JOptionPane.showMessageDialog(null, "商品信息修改成功！", "消息",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null,
+							"商品信息添加失败，请检查商品编码是否已存在！", "警告",
+							JOptionPane.WARNING_MESSAGE);
+				}
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				CommonUtil.showError("网络连接错误");
+			} 
+		}
 	}
 }

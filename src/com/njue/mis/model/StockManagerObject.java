@@ -9,8 +9,13 @@ public class StockManagerObject {
 	private double portPrice;
 	private double totalPortMoney;
 	
+	private int stockNumber;
+	private double stockPrice;
+	private double stockMoney;
+	
 	public StockManagerObject(String goodsName, int saleNumber, double salesPrice, double totalSalesMoney,
-			int portNumber, double portPrice, double totalPortMoney){
+			int portNumber, double portPrice, double totalPortMoney,
+			int stockNumber, double stockPrice, double stockMoney){
 		this.goodsName = goodsName;
 		this.salesNumber = saleNumber;
 		this.salesPrice = salesPrice;
@@ -18,6 +23,9 @@ public class StockManagerObject {
 		this.portNumber = portNumber;
 		this.portPrice = portPrice;
 		this.totalPortMoney = totalPortMoney;
+		this.stockMoney = stockMoney;
+		this.stockNumber = stockNumber;
+		this.stockPrice = stockPrice;
 	}
 
 	public String getGoodsName() {
@@ -75,4 +83,29 @@ public class StockManagerObject {
 	public void setTotalPortMoney(double totalPortMoney) {
 		this.totalPortMoney = totalPortMoney;
 	}
+
+	public int getStockNumber() {
+		return stockNumber;
+	}
+
+	public void setStockNumber(int stockNumber) {
+		this.stockNumber = stockNumber;
+	}
+
+	public double getStockPrice() {
+		return stockPrice;
+	}
+
+	public void setStockPrice(double stockPrice) {
+		this.stockPrice = stockPrice;
+	}
+
+	public double getStockMoney() {
+		return stockMoney;
+	}
+
+	public void setStockMoney(double stockMoney) {
+		this.stockMoney = stockMoney;
+	}
+	
 }

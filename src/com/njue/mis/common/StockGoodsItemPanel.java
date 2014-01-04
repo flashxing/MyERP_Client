@@ -5,8 +5,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.font.NumericShaper;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -23,35 +21,30 @@ import javax.swing.table.DefaultTableModel;
 
 import com.njue.mis.model.Goods;
 import com.njue.mis.model.GoodsItem;
+import com.njue.mis.model.StockItem;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
-public class GoodsItemPanel extends JPanel{
+public class StockGoodsItemPanel extends JPanel{
 	private String portId;
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	private List<GoodsItem> goodsItemList;
+	private List<StockItem> stockItemList;
 	private JButton addButton;
 	private JButton deleteButton;
-	private JTextField totalMoneyField;
 	protected JTable table;
 	protected DefaultTableModel model;
 	protected JScrollPane scrollPane;
-	protected String[] columns = {"编号","商品","数量","单价","总价","备注"};
+	protected String[] columns = {"编号","商品","数量","备注"};
 	protected double money;
-	private DecimalFormat df=new DecimalFormat(".##");
-	public GoodsItemPanel(String portId){
+	public StockGoodsItemPanel(String portId){
 		super();
 		this.portId = portId;
-		goodsItemList = new ArrayList<GoodsItem>();
+		stockItemList = new ArrayList<>();
 		init();
 	}
 	public void init(){
 		setLayout(new BorderLayout());
 		setSize(screenSize.width * 3/5, screenSize.height*2/5);
 		JPanel north = new JPanel();
-		JLabel label = new JLabel("总额:");
-		totalMoneyField = new JTextField(10);
-		totalMoneyField.setEditable(false);
-		north.add(label);
-		north.add(totalMoneyField);
 		addButton = new JButton("添加商品");
 		deleteButton = new JButton("删除商品");
 		addButton.addActionListener(new AddItemAction());
@@ -61,45 +54,15 @@ public class GoodsItemPanel extends JPanel{
 		model = new DefaultTableModel(columns, 0){
 			@Override
 			public boolean isCellEditable(int r,int c){
-				if(c == 0|| c == 4){
+				if(c == 0){
 					return false;
 				}
 				return true;
 			}
 		};
 		table = new JTable(model);
-		table.getModel().addTableModelListener(new TableModelListener() {
-			
-			@Override
-			public void tableChanged(TableModelEvent arg0) {
-				// TODO Auto-generated method stub
-				money = calTotalMoney();
-				totalMoneyField.setText(""+money);
-			}
-		});
 		CommonUtil.setDuiqi(table);
 		table.setModel(model);
-		table.getModel().addTableModelListener(new TableModelListener() {
-			
-			@Override
-			public void tableChanged(TableModelEvent arg0) {
-				money = calTotalMoney();
-				totalMoneyField.setText(""+money);
-				for(int i = 0; i < model.getRowCount(); ++i){
-					Goods goods = (Goods) model.getValueAt(i, 1);
-					if(goods == null){
-						continue;
-					}
-					Object priceObject = model.getValueAt(i, 3);
-					if(priceObject != null&&!priceObject.equals("")){
-						continue;
-					}
-					double price = goods.getPrice();
-					String st=df.format(price);
-					model.setValueAt(st, i, 3);
-				}
-			}
-		});
 		table.setRowSelectionAllowed(false);
 		table.setPreferredScrollableViewportSize(new Dimension(screenSize.width * 3 / 5,
 				screenSize.height  / 5));
@@ -110,10 +73,9 @@ public class GoodsItemPanel extends JPanel{
         add(north, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
 	}
-	public List<GoodsItem> getGoodsItemList(){
+	public List<StockItem> getGoodsItemList(){
 		money = 0;
-		goodsItemList.clear();
-		System.out.println(model.getRowCount());
+		stockItemList.clear();
 		for(int i = 0; i < model.getRowCount(); i++){
 			int itemId = (Integer) model.getValueAt(i, 0);
 			Goods goods = (Goods) model.getValueAt(i, 1);
@@ -121,23 +83,19 @@ public class GoodsItemPanel extends JPanel{
 				continue;
 			}
 			int number;
-			double item_money;
 			try{
 				number = Integer.parseInt((String)model.getValueAt(i, 2));
-				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, 3))));
-				money+=number*item_money;
-				money=Double.parseDouble(df.format((money)));
-				if(money<0||number<=0){
-					CommonUtil.showError("数量和单价必须为正");
+				if(number<=0){
+					CommonUtil.showError("数量必须为正");
 				}
 			}catch(Exception ex){
 				continue;
 			}
-			double totalPrice = number*item_money;
-			String item_comment = (String) model.getValueAt(i, 5);
-			goodsItemList.add(new GoodsItem(itemId, portId, goods.getId(), number, item_money, totalPrice, item_comment));
+			String item_comment = (String) model.getValueAt(i, 3);
+			System.out.println("GoodsId: "+goods.getId());
+			stockItemList.add(new StockItem(itemId, portId, goods.getId(), number, item_comment));
 		}
-		return this.goodsItemList;
+		return this.stockItemList;
 	}
 	public double getMoney(){
 		return money;
@@ -148,11 +106,11 @@ public class GoodsItemPanel extends JPanel{
 		public void actionPerformed(ActionEvent arg0) {
 			// TODO Auto-generated method stub
 			int id = model.getRowCount();
+			table.getColumnModel().getColumn(1).setCellRenderer(new GoodsButtonRender());
+			table.getColumnModel().getColumn(1).setCellEditor(new GoodsButtonEditor());
 			Vector rows = new Vector();
 			rows.add(id);
 			model.addRow(rows);
-			table.getColumnModel().getColumn(1).setCellRenderer(new GoodsButtonRender());
-			table.getColumnModel().getColumn(1).setCellEditor(new GoodsButtonEditor());
 		}
 		
 	}
@@ -178,39 +136,9 @@ public class GoodsItemPanel extends JPanel{
 		}
 		
 	}
-	
-	private double calTotalMoney(){
-		money = 0;
-		for(int i = 0; i < model.getRowCount(); i++){
-			int number;
-			double item_money;
-			try{
-				number = Integer.parseInt((String)model.getValueAt(i, 2));
-				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, 3))));
-				money+=number*item_money;
-				if(money<0||number<=0){
-					CommonUtil.showError("数量和单价必须为正");
-				}
-				double total_price = 0;
-				total_price = number*item_money;
-				Object object = model.getValueAt(i, 4);
-				if(object!=null && total_price == Double.parseDouble((String) object)){
-					System.out.println(total_price+"***"+model.getValueAt(i, 4));
-					continue;
-				}	
-				model.setValueAt(total_price, i, 4);
-			}catch(Exception ex){
-				continue;
-			}
-		}
-		return money;
-	}
-	
 	public void clearData(){
 		while(model.getRowCount()>0){
 			model.removeRow(0);
 		}
-		calTotalMoney();
-		totalMoneyField.setText(""+money);
 	}
 }

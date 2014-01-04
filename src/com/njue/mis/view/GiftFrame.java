@@ -41,47 +41,50 @@ import com.njue.mis.interfaces.StockObjectControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.GiftIn;
+import com.njue.mis.model.GiftOut;
 import com.njue.mis.model.Goods;
+import com.njue.mis.model.InCome;
+import com.njue.mis.model.OutCome;
 import com.njue.mis.model.Stock;
 import com.njue.mis.model.StockItem;
+import com.njue.mis.model.StockObject;
 import com.njue.mis.model.StoreHouse;
 
 
-public class GiftInFrame extends JInternalFrame
+public class GiftFrame extends JInternalFrame
 {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1996990177020227534L;
 
-	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	protected Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	
-	private JTextField goodsField;
-	private JTextField goodsNameField;
-	private JTextField idField;
-	private JTextField operatorField;
-	private CustomerButton customerButton;
-	private JButton inComeButton;
-	private JComboBox<StoreHouse> storeHouseComboBox;
+	protected JTextField goodsField;
+	protected JTextField goodsNameField;
+	protected JTextField idField;
+	protected JTextField operatorField;
+	protected JLabel receiverLabel;
+	protected CustomerButton customerButton;
+	protected JButton commitButton;
+	protected JComboBox<StoreHouse> storeHouseComboBox;
+	protected JPanel panel5;
 	
-    private StockGoodsItemPanel goodsPanel;
+	protected StockGoodsItemPanel goodsPanel;
 //	private Customer selectedCustomer;
-	private Goods selectedGoods;
-	private StoreHouse selectedSH;
-	private List<StoreHouse> storeHouseList;
+	protected Goods selectedGoods;
+	protected StoreHouse selectedSH;
+	protected List<StoreHouse> storeHouseList;
 	
-	private StoreHouseControllerInterface storeHouseHandler;
-	private StockObjectControllerInterface stockObjectHandler;
-	private StockControllerInterface stockHandler;
+	protected StoreHouseControllerInterface storeHouseHandler;
+	protected StockObjectControllerInterface stockObjectHandler;
+	protected StockControllerInterface stockHandler;
 	
-	private JTextField timeField;
-	private Date date;
-	
-	private int existNumber;
-	
-	public GiftInFrame()
+	protected JTextField timeField;
+	protected Date date;
+	public GiftFrame(String frameName)
 	{
-		super("库存受赠",true,true,true,true);
+		super(frameName,true,true,true,true);
 		init();
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
 				screenSize.height * 4 / 7);
@@ -114,11 +117,11 @@ public class GiftInFrame extends JInternalFrame
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setSize(screenSize.width * 3 / 5,
 				screenSize.height * 3 / 5);
-		JPanel panel5 = new JPanel();
+		panel5 = new JPanel();
 		JLabel salesIdlable = new JLabel("受赠票号:");
 		idField = new JTextField(12);
 		idField.setEditable(false);
-		JLabel receiverLabel = new JLabel("赠送者:");
+		receiverLabel = new JLabel("赠送者:");
 		customerButton = new CustomerButton("。。。");
 
 		JLabel operatorLabel = new JLabel("操作员:");
@@ -154,46 +157,47 @@ public class GiftInFrame extends JInternalFrame
 		
 		goodsPanel = new StockGoodsItemPanel(idField.getText());
 		JPanel commitPanel = new JPanel();
-		inComeButton = new JButton("受赠");
-		inComeButton.addActionListener(new InComeListener());
-		commitPanel.add(inComeButton);
+		commitButton = new JButton("提交");
+		commitPanel.add(commitButton);
 		
 		panel.add(panel5,BorderLayout.NORTH);
 		panel.add(goodsPanel, BorderLayout.CENTER);
 		panel.add(commitPanel, BorderLayout.SOUTH);
 		return panel;
 	}
-	private class InComeListener implements ActionListener{
-		@Override
-		public void actionPerformed(ActionEvent arg0){
-			String id = idField.getText();
-			Customer customer = customerButton.getCustomer();
+	protected StockObject createStockObject(int type){
+		String id = idField.getText();
+		int storeHouseId = ((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
+		double price = 0.0;
+		String time = timeField.getText();
+		String operatePerson = operatorField.getText();
+		String comment = "";
+		List<StockItem> stockItems = goodsPanel.getGoodsItemList();
+		Customer customer;
+		String receiver;
+		switch (type) {
+		case 0:
+			customer = customerButton.getCustomer();
 			if(customer == null){
 				CommonUtil.showError("赠送者不能为空");
-				return;
+				return null;
 			}
-			String receiver = customer.getName();
-			int storeHouseId = ((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-			double price = 0.0;
-			String time = timeField.getText();
-			String operatePerson = operatorField.getText();
-			String comment = "";
-			List<StockItem> stockItems = goodsPanel.getGoodsItemList();
-			GiftIn giftIn = new GiftIn(id, receiver, "", storeHouseId, 0, price, time, operatePerson, comment, stockItems);
-			try {
-				if(!id.equals(stockObjectHandler.addStockIn(giftIn))){
-					CommonUtil.showError("添加失败");
-					return;
-				}else{
-					CommonUtil.showError("添加成功");
-					initBaseInfo();
-					goodsPanel.clearData();
-				}
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				CommonUtil.showError("网络错误");
-				return;
+			receiver = customer.getName();
+			return new GiftIn(id, receiver, "", storeHouseId, 0, price, time, operatePerson, comment, stockItems);
+		case 1:
+			customer = customerButton.getCustomer();
+			if(customer == null){
+				CommonUtil.showError("赠送者不能为空");
+				return null;
 			}
-		}
+			receiver = customer.getName();
+			return new GiftOut(id, receiver, "", storeHouseId, 0, price, time, operatePerson, comment, stockItems);
+		case 2:
+			return new InCome(id, "", "", storeHouseId, 0, price, time, operatePerson, comment, stockItems);
+		case 3:
+			return new OutCome(id, "", "", storeHouseId, 0, price, time, operatePerson, comment, stockItems);
+		default:
+			return null;
+		}	
 	}
 }

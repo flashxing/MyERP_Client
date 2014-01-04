@@ -4,10 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Toolkit;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +17,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
@@ -42,6 +37,7 @@ public class CategoryFrame extends JInternalFrame
     protected JButton removeButton;
     protected JButton updateButton;
     protected JButton addGoodsButton;
+    protected JButton updateEntityButton;
     protected DefaultMutableTreeNode clickNode;
     protected DefaultMutableTreeNode root;
     protected JTextField insertField;
@@ -84,6 +80,7 @@ public class CategoryFrame extends JInternalFrame
 	public void init(final List<Category> list)
 	{
 		addGoodsButton = new JButton("ÃÌº”…Ã∆∑");
+		updateEntityButton = new JButton();
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setSize(new Dimension(screenSize.width * 2 / 3,
 				screenSize.height * 4/7));
@@ -116,6 +113,7 @@ public class CategoryFrame extends JInternalFrame
         panel.add(updateField);
         panel.add(updateButton);
         panel.add(addGoodsButton);
+        panel.add(updateEntityButton);
 
        
         table = CommonUtil.createTable(objects,initList,fieldsToShow);

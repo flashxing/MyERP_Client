@@ -44,6 +44,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.njue.mis.client.Configure;
+import com.njue.mis.common.CardItemButton;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.ButtonEditor;
 import com.njue.mis.common.ButtonRender;
@@ -58,6 +59,7 @@ import com.njue.mis.interfaces.ReceiptControllerInterface;
 import com.njue.mis.interfaces.StockControllerInterface;
 import com.njue.mis.interfaces.StockObjectControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
+import com.njue.mis.model.CardItem;
 import com.njue.mis.model.GiftIn;
 import com.njue.mis.model.Goods;
 import com.njue.mis.model.Money;
@@ -70,6 +72,8 @@ import com.njue.mis.model.ReceiptItemDetail;
 import com.njue.mis.model.ReceiptOut;
 import com.njue.mis.model.Stock;
 import com.njue.mis.model.StoreHouse;
+import com.sun.media.sound.ModelAbstractChannelMixer;
+
 import javax.swing.JTextArea;
 import java.awt.Font;
 
@@ -82,6 +86,7 @@ public class MoneyFrame extends JInternalFrame
 	protected JTextField moneyField;
 	protected JTextField timeField;
 	protected JTextField operatorField;
+	protected CardItemButton cardItemButton;
 	protected JButton addButton;
 	protected JButton addItemButton;
 	protected JButton deleteItemButton;
@@ -137,14 +142,17 @@ public class MoneyFrame extends JInternalFrame
 
 		String operator = operatorField.getText();
 		String time = timeField.getText();
-
+		CardItem cardItem = cardItemButton.getCardItem();
+		if(cardItem == null){
+			CommonUtil.showError("请选择一个账户");
+			return null;
+		}
 		moneyItemDetailList = new ArrayList<MoneyItemDetail>();
 		for(int i = 0; i < model.getRowCount(); i++){
 			int itemId = (Integer) model.getValueAt(i, 0);
 			System.out.println("itemId "+itemId);
-			ButtonEditor cellEditor = (ButtonEditor) table.getCellEditor(i, 1);
 			MoneyItemButton itemButton;
-			itemButton = (MoneyItemButton) cellEditor.getButton();
+			itemButton = (MoneyItemButton) model.getValueAt(i, 1);
 			if(itemButton.getMoneyItem() == null){
 				continue;
 			}
@@ -166,7 +174,7 @@ public class MoneyFrame extends JInternalFrame
 			String item_comment = (String) model.getValueAt(i, 3);
 			moneyItemDetailList.add(new MoneyItemDetail(id, itemId, item.getName(), item_money, item_comment));
 		}
-		return new Money(id,money,time,operator,moneyItemDetailList);
+		return new Money(id,money,time,operator,cardItem.getName(), moneyItemDetailList);
 	}
 	public JPanel importgoods()
 	{
@@ -179,6 +187,8 @@ public class MoneyFrame extends JInternalFrame
 		JLabel timeLabel = new JLabel("时间");
 		timeField = new JTextField(12);
 		timeField.setEditable(false);
+		JLabel cardLabel = new JLabel("账户");
+		cardItemButton = new CardItemButton("。。。");
 		JLabel operatorLabel = new JLabel("操作员:");
 		operatorField = new JTextField(10);
 		operatorField.setText(MainFrame.username);
@@ -187,6 +197,8 @@ public class MoneyFrame extends JInternalFrame
 		panelBaseInfo.add(idField);
 		panelBaseInfo.add(timeLabel);
 		panelBaseInfo.add(timeField);
+		panelBaseInfo.add(cardLabel);
+		panelBaseInfo.add(cardItemButton);
 		panelBaseInfo.add(operatorLabel);
 		panelBaseInfo.add(operatorField);
 		panelBaseInfo.setSize(new Dimension(screenSize.width * 2 / 3-60,
@@ -218,8 +230,6 @@ public class MoneyFrame extends JInternalFrame
 			}
 		};
 		table = new JTable(model);
-		table.getColumnModel().getColumn(1).setCellRenderer(new ButtonRender<MoneyItemButton>(MoneyItemButton.class));
-		table.getColumnModel().getColumn(1).setCellEditor(new ButtonEditor<MoneyItemButton>(MoneyItemButton.class));
 		CommonUtil.setDuiqi(table);
 		table.setModel(model);
 		table.setRowSelectionAllowed(false);
@@ -266,6 +276,8 @@ public class MoneyFrame extends JInternalFrame
 			Vector rows = new Vector();
 			rows.add(id);
 			model.addRow(rows);
+			table.getColumnModel().getColumn(1).setCellRenderer(new ButtonRender<MoneyItemButton>(MoneyItemButton.class));
+			table.getColumnModel().getColumn(1).setCellEditor(new ButtonEditor<MoneyItemButton>(MoneyItemButton.class));
 		}
 		
 	}

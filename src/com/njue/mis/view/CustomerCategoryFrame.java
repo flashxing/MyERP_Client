@@ -34,6 +34,7 @@ public class CustomerCategoryFrame extends CategoryFrame
 	private static final long serialVersionUID = -6208433914029145693L;
 	private CategoryControllerInterface categoryService;
 	private CustomerControllerInterface customerService;
+	private List<Customer> customerList;
 	public CustomerCategoryFrame(List<Category> list)
 	{
 		super("客户管理",list);
@@ -51,10 +52,10 @@ public class CustomerCategoryFrame extends CategoryFrame
 			e2.printStackTrace();
 		}
 		objects = new String[]{
-				"客户编号","客户姓名","邮箱","电话","地址","应付","应收"
+				"客户编号","客户姓名","邮箱","电话","地址","应收额度","应付","应收"
 		};
 		fieldsToShow = new String[]{
-				"id","name","email","telephone","address","give","receive"
+				"id","name","email","telephone","address","maxMoney","give","receive"
 		};
 		super.init(list);
 		addGoodsButton.setText("添加客户");
@@ -70,6 +71,21 @@ public class CustomerCategoryFrame extends CategoryFrame
 				CustomerFrame customerFrame = new CustomerFrame(selected.getCate_id());
 				MainFrame.getMainFrame().getContentPane().add(customerFrame);
 				customerFrame.setVisible(true);
+			}
+		});
+		updateEntityButton.setText("更新客户");
+		updateEntityButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				int index = table.getSelectedRow();
+				if(index<0||index>=customerList.size()||customerList.get(index)==null){
+					CommonUtil.showError("请选择一个客户");
+					return;
+				}else{
+					CustomerFrame customerFrame = new CustomerFrame(customerList.get(index));
+					MainFrame.getMainFrame().getContentPane().add(customerFrame);
+					customerFrame.setVisible(true);
+				}
 			}
 		});
         addButton.addActionListener( new ActionListener(){
@@ -194,7 +210,7 @@ public class CustomerCategoryFrame extends CategoryFrame
 			if(clickNode.isLeaf()){
 				int cateId = selected.getCate_id();
 				try{
-					Vector<Customer> customerList = customerService.getAllCustomerByCateId(cateId);
+					customerList = customerService.getAllCustomerByCateId(cateId);
 					Vector<CustomerMoney> customerMoneyList = new Vector<>();
 					for(Customer customer:customerList){
 						if(customer.getCustomerMoney() == null){

@@ -13,17 +13,20 @@ public class Money implements Serializable{
 	public Double money;
 	public String time;
 	public String operator;
+	public String cardName;
 	public List<MoneyItemDetail> moneyItemDetailList;
 	
 	public Money(){
 		moneyItemDetailList = new ArrayList<>();
 	}
 	
-	public Money(String id, Double money, String time, String operator, List<MoneyItemDetail> list){
+	public Money(String id, Double money, String time, String operator,
+			String cardName, List<MoneyItemDetail> list){
 		this.id = id;
 		this.money = money;
 		this.time = time;
 		this.operator = operator;
+		this.cardName = cardName;
 		this.moneyItemDetailList = list;
 	}
 	
@@ -58,12 +61,21 @@ public class Money implements Serializable{
 		this.moneyItemDetailList = moneyItemDetailList;
 	}
 	
+	
+	public String getCardName() {
+		return cardName;
+	}
+
+	public void setCardName(String cardName) {
+		this.cardName = cardName;
+	}
+
 	public Money clone(){
 		List<MoneyItemDetail> list = new ArrayList<>();
 		for(MoneyItemDetail moneyItemDetail:this.moneyItemDetailList){
 			list.add(moneyItemDetail.clone());
 		}
-		return new Money(id, money, time, operator, list);
+		return new Money(id, money, time, operator, cardName, list);
 	}
 	
 }

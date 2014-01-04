@@ -1,11 +1,9 @@
 package com.njue.mis.client;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
-
-import com.njue.mis.common.CommonUtil;
-
 
 public class Configure {
 	private static Properties propertie;
@@ -29,11 +27,14 @@ public class Configure {
 	public static String GoodsItemController = null;
 	public static String MoneyItemController = null;
 	public static String MoneyController = null;
+	public static String CardItemController = null;
+	public static String SalesManController = null;
 //	public final static String IP = "localhost:3333";
 	public final static int init(){
 		propertie = new Properties();
 		try{
-			inputFile = Configure.class.getClassLoader().getResourceAsStream("erp.property");
+			inputFile = new FileInputStream(new File("conf/erp.property"));
+//			inputFile = Configure.class.getClassLoader().getResourceAsStream("erp.property");
 			propertie.load(inputFile);
 			ReceiptController = "rmi://"+getValue("URL")+"/ReceiptController";
 			StockController = "rmi://"+getValue("URL")+"/StockController";
@@ -54,6 +55,8 @@ public class Configure {
 			GoodsItemController = "rmi://"+getValue("URL")+"/GoodsItemController";
 			MoneyItemController = "rmi://"+getValue("URL")+"/MoneyItemController";
 			MoneyController = "rmi://"+getValue("URL")+"/MoneyController";
+			CardItemController = "rmi://"+getValue("URL")+"/CardItemController";
+			SalesManController = "rmi://"+getValue("URL")+"/SalesManController";
 			inputFile.close();
 			return 1;
 		}catch(Exception ex){

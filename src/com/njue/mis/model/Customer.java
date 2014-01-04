@@ -20,19 +20,20 @@ public class Customer extends Person
 
 	public Customer(String id, String customerName, String zip, String address,
 			String telephone, String fax, String connectionPerson,
-			String phone, String email, String bank, String account, CustomerMoney customerMoney)
+			String phone, String email, String bank, String account,
+			double maxMoney, CustomerMoney customerMoney)
 	{
 		super(id, customerName, zip, address, telephone, fax, connectionPerson, phone,
-				email, bank, account, customerMoney);
+				email, bank, account, maxMoney, customerMoney);
 	}
 
 	public Customer(String id, String name, String zip, String address,
 			String telephone, String fax, String connectionPerson,
 			String phone, String email, String bank, String account,
-			int available,int cateId, CustomerMoney customerMoney)
+			int available,int cateId, Double maxMoney, CustomerMoney customerMoney)
 	{
 		super(id, name, zip, address, telephone, fax, connectionPerson, phone, email,
-				bank, account, available, cateId, customerMoney);
+				bank, account, available, cateId, maxMoney, customerMoney);
 		// TODO Auto-generated constructor stub
 	}
 	

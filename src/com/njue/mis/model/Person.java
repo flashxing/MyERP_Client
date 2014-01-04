@@ -28,6 +28,7 @@ public abstract class Person implements Serializable
 	public String account;  //开户账号
 	public int available;  //状态 非0代表可用
 	public int cateId;
+	public double maxMoney;
 	public CustomerMoney customerMoney;
 
 	public Person()
@@ -37,7 +38,7 @@ public abstract class Person implements Serializable
 	}
 	public Person(String id, String name, String zip, String address,
 			String telephone, String connectionPerson, String phone,
-			String bank, String account, String email, String fax, CustomerMoney customerMoney)
+			String bank, String account, String email, String fax, double maxMoney, CustomerMoney customerMoney)
 	{
 		super();
 		this.id = id;
@@ -51,13 +52,14 @@ public abstract class Person implements Serializable
 		this.email = email;
 		this.bank = bank;
 		this.account = account;
+		this.maxMoney = maxMoney;
 		this.customerMoney = customerMoney;
 	}
 	
 	public Person(String id, String name, String zip, String address,
 			String telephone, String fax, String connectionPerson,
 			String phone, String email, String bank, String account,
-			int available, int cateId, CustomerMoney customerMoney)
+			int available, int cateId, double maxMoney, CustomerMoney customerMoney)
 	{
 		super();
 		this.id = id;
@@ -73,6 +75,7 @@ public abstract class Person implements Serializable
 		this.account = account;
 		this.available = available;
 		this.cateId = cateId;
+		this.maxMoney = maxMoney;
 		this.customerMoney = customerMoney;
 	}
 	
@@ -89,6 +92,7 @@ public abstract class Person implements Serializable
 		this.bank = person.bank;
 		this.account = person.account;
 		this.available = person.available;
+		this.maxMoney = person.maxMoney;
 	}
 	public String getId()
 	{
@@ -197,6 +201,13 @@ public abstract class Person implements Serializable
 	}
 	public void setCustomerMoney(CustomerMoney customerMoney) {
 		this.customerMoney = customerMoney;
+	}
+	
+	public double getMaxMoney() {
+		return maxMoney;
+	}
+	public void setMaxMoney(double maxMoney) {
+		this.maxMoney = maxMoney;
 	}
 	/**
 	 * 表格控件调用

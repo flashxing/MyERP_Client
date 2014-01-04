@@ -71,11 +71,8 @@ public class SalesBackFrame extends JInternalFrame
     protected String[] goodsColumns={"商品编号","商品名称","商品描述"};
     protected String[] goodsFields={"productCode","goodsName","description"};
     protected Object[] goodsList = {};
-	private JTextField goodsDiscountField;
 	private List<StoreHouse> storeHouseList;
-	
 
-	private DiscountControllerInterface discountHandler;
 	private StoreHouseControllerInterface storeHouseHandler;
 	private SalesControllerInterface salesHandler;
 	private Discount discount;
@@ -84,7 +81,7 @@ public class SalesBackFrame extends JInternalFrame
 	
 	public SalesBackFrame()
 	{
-		super("销售单",true,true,true,true);
+		super("销售退货单",true,true,true,true);
 		date = new Date();
 		init();
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
@@ -93,7 +90,6 @@ public class SalesBackFrame extends JInternalFrame
 	}
 	public void init(){
 		try {
-			discountHandler=(DiscountControllerInterface) Naming.lookup(Configure.DiscountController);
 			salesHandler = (SalesControllerInterface) Naming.lookup(Configure.SalesController);
 			storeHouseHandler = (StoreHouseControllerInterface) Naming.lookup(Configure.StoreHouseController);
 			storeHouseList = storeHouseHandler.getAll();
@@ -103,7 +99,11 @@ public class SalesBackFrame extends JInternalFrame
 			CommonUtil.showError("网络错误");
 		}
 	}
-	
+	private void initDiscount(){
+		discount = new Discount();
+		customerButton.setDiscount(discount);
+		goodsPanel.setDiscount(discount);
+	}
 	private void resetData(){
 		date = new Date();
 		SimpleDateFormat formate =new SimpleDateFormat("yyyyMMddHHmmss");
@@ -150,6 +150,7 @@ public class SalesBackFrame extends JInternalFrame
 		
 		resetData();
 		goodsPanel = new SalesGoodsItemPanel(salesIdField.getText());
+		initDiscount();
 		
 		JPanel panelCommit = new JPanel();
 		JButton commitButton = new JButton("提交");
@@ -163,10 +164,6 @@ public class SalesBackFrame extends JInternalFrame
 		return panel;
 	}
 
-	private void clearTextField()
-	{
-		goodsDiscountField.setText("");
-	}
 	private class SalesAddListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent arg0){
@@ -175,7 +172,7 @@ public class SalesBackFrame extends JInternalFrame
 				CommonUtil.showError("请选择一个客户");
 				return;
 			}
-			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList();
+			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(-1);
 			if(list == null|| list.size() == 0){
 				CommonUtil.showError("请选中一个商品");
 				return;
@@ -184,7 +181,8 @@ public class SalesBackFrame extends JInternalFrame
 			String time = timeField.getText();
 			String operator = operatorField.getText();
 			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-			SalesBack sales = new SalesBack(id,customer.getId(),"",0,goodsPanel.getMoney(),time,operator,"",0,0,shId,list);
+			SalesBack sales = new SalesBack(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,"",0,
+					goodsPanel.getMoney(), goodsPanel.getDecreaseMoney(),shId, 1, "", list);
 			try {
 				String result = salesHandler.addSalesBack(sales);
 				if(result == null){

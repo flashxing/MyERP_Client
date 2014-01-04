@@ -28,7 +28,7 @@ public class SalesStatisticFrame extends StatisticFrame{
 	
 	public SalesStatisticFrame()
 	{
-		super("收据统计");
+		super("销售统计");
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
 				screenSize.height * 4 / 7);
 		initIn();

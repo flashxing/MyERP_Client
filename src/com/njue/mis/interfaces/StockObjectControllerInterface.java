@@ -2,9 +2,8 @@ package com.njue.mis.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Vector;
+import java.util.List;
 
-import com.njue.mis.model.Gift;
 import com.njue.mis.model.GiftIn;
 import com.njue.mis.model.GiftOut;
 import com.njue.mis.model.InCome;
@@ -21,8 +20,8 @@ public interface StockObjectControllerInterface extends Remote{
 	public GiftOut getGiftOut(String id) throws RemoteException;
 	public InCome getInCome(String id) throws RemoteException;
 	public OutCome getOutCome(String id) throws RemoteException;
-	public Vector<GiftIn> getAllGiftIn() throws RemoteException;
-	public Vector<GiftOut> getAllGiftOut() throws RemoteException;
-	public Vector<InCome> getAllInCome() throws RemoteException;
-	public Vector<OutCome> getAllOutCome() throws RemoteException;
+	public List<GiftIn> getAllGiftIn() throws RemoteException;
+	public List<GiftOut> getAllGiftOut() throws RemoteException;
+	public List<InCome> getAllInCome() throws RemoteException;
+	public List<OutCome> getAllOutCome() throws RemoteException;
 }
