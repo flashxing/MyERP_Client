@@ -345,12 +345,23 @@ public class GoodsFrame extends JInternalFrame
 		priceField.setText("");
 		salesPriceField.setText("");
 	}
+	public void initWithGoods(Goods goods){
+		if(goods!=null){
+			goodsField.setText(goods.getGoodsName());
+			ID_goodsField.setText(goods.getProductCode());
+			priceField.setText(goods.getPrice()+"");
+			goodsdressField.setText(goods.getProducePlace());
+			packageField.setText(goods.get_package());
+			sizeField.setText(goods.getSize());
+			promitField.setText(goods.getPromitCode());
+			decriptionField.setText(goods.getDescription());
+			ID_privoderField.setText(goods.getProviderId());
+		}
+	}
 	private void testIfUpdate(){
 		if(goods!=null){
 			goodsField.setText(goods.getGoodsName());
-			goodsField.setEditable(false);
 			ID_goodsField.setText(goods.getProductCode());
-			ID_goodsField.setEditable(false);
 			priceField.setText(goods.getPrice()+"");
 			goodsdressField.setText(goods.getProducePlace());
 			packageField.setText(goods.get_package());
@@ -443,6 +454,18 @@ public class GoodsFrame extends JInternalFrame
 	private class UpdateAction implements ActionListener{
 		public void actionPerformed(ActionEvent e)
 		{
+			if (goodsField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "商品全称不能为空！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (ID_goodsField.getText().trim().length() == 0)
+			{
+				JOptionPane.showMessageDialog(null, "商品编号不能为空！", "警告",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
 			if (priceField.getText().trim().length() == 0)
 			{
 				JOptionPane.showMessageDialog(null,"商品价格不能为空！", "警告",
@@ -461,7 +484,7 @@ public class GoodsFrame extends JInternalFrame
 			
 			double price = CommonUtil.getDoubleFromTextField(priceField);
 			if (price < 0){
-				JOptionPane.showMessageDialog(null,"商品价格不合法！", "警告",
+				JOptionPane.showMessageDialog(null,"商品价格不合法!!", "警告",
 						JOptionPane.WARNING_MESSAGE);
 				return;
 			}			
@@ -473,6 +496,7 @@ public class GoodsFrame extends JInternalFrame
 			}
 			salesPrice = CommonUtil.formateDouble(salesPrice);
 			try {
+				goods.setGoodsName(goodsField.getText());
 				goods.setProducePlace(goodsdressField.getText());
 				goods.setSize(sizeField.getText());
 				goods.set_package(packageField.getText());
@@ -480,6 +504,8 @@ public class GoodsFrame extends JInternalFrame
 				goods.setDescription(decriptionField.getText());
 				goods.setPrice(price);
 				goods.setSalesPrice(salesPrice);
+				goods.setProductCode(ID_goodsField.getText());
+				System.out.println(goods.getId());
 				if (goodsService.updateGoods(goods))
 				{
 					JOptionPane.showMessageDialog(null, "商品信息修改成功！", "消息",

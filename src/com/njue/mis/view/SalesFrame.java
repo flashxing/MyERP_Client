@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
@@ -24,6 +26,8 @@ import javax.swing.JTextField;
 import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.CustomerButton;
+import com.njue.mis.common.PrintPanle;
+import com.njue.mis.common.Printer;
 import com.njue.mis.common.SalesGoodsItemPanel;
 import com.njue.mis.common.SalesManButton;
 import com.njue.mis.interfaces.DiscountControllerInterface;
@@ -52,21 +56,24 @@ public class SalesFrame extends JInternalFrame
 	private SalesManButton salesManButton;
 	private SalesGoodsItemPanel goodsPanel;
 	private JComboBox<StoreHouse> storeHouseComboBox;
+	private JComboBox<String> printStyleComboBox;
 	
     protected String[] goodsColumns={"商品编号","商品名称","商品描述"};
     protected String[] goodsFields={"productCode","goodsName","description"};
     protected Object[] goodsList = {};
 	private JTextField goodsDiscountField;
 	private List<StoreHouse> storeHouseList;
-	
+	private PrintPanle printPanle;
 
 	private DiscountControllerInterface discountHandler;
 	private StoreHouseControllerInterface storeHouseHandler;
 	private SalesControllerInterface salesHandler;
 	private Discount discount;
 	private JTextField timeField;
+	private JTextField commentField;
 	private Date date;
 	
+	private Customer customer;
 	public SalesFrame()
 	{
 		super("销售出货单",true,true,true,true);
@@ -95,6 +102,7 @@ public class SalesFrame extends JInternalFrame
 		salesIdField.setText("PS"+formate.format(date));
 		formate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		timeField.setText(formate.format(date));
+		commentField.setText("");
 //		priceField.setText("");
 //		numberField.setText("");
 	}
@@ -103,41 +111,48 @@ public class SalesFrame extends JInternalFrame
 	{
 
 		JPanel panel = new JPanel(new BorderLayout());
+		JPanel northPanel = new JPanel(new BorderLayout());
+		JPanel commentPanel = new JPanel();
 		panel.setSize(screenSize.width * 3 / 5,
 				screenSize.height * 3 / 5);
-		JPanel panel5 = new JPanel();
+		JPanel baseInfoPanel = new JPanel();
 		JLabel salesIdlable = new JLabel("销售票号:");
 		salesIdField = new JTextField(12);
 		salesIdField.setEditable(false);
-		panel5.add(salesIdlable);
-		panel5.add(salesIdField);
+		baseInfoPanel.add(salesIdlable);
+		baseInfoPanel.add(salesIdField);
 		JLabel customerLabel = new JLabel("客户");
 		customerButton = new CustomerButton("。。。");
-		panel5.add(customerLabel);
-		panel5.add(customerButton);
+		baseInfoPanel.add(customerLabel);
+		baseInfoPanel.add(customerButton);
 		JLabel salesManLabel = new JLabel("业务员:");
 		salesManButton = new SalesManButton("。。。");
-		panel5.add(salesManLabel);
-		panel5.add(salesManButton);
+		baseInfoPanel.add(salesManLabel);
+		baseInfoPanel.add(salesManButton);
 		JLabel operatorLabel = new JLabel("操作员:");
 		operatorField = new JTextField(10);
 		operatorField.setText(MainFrame.username);
 		operatorField.setEditable(false);
-		panel5.add(operatorLabel);
-		panel5.add(operatorField);
+		baseInfoPanel.add(operatorLabel);
+		baseInfoPanel.add(operatorField);
 		JLabel shLabel = new JLabel("仓库");
 		storeHouseComboBox = new JComboBox<StoreHouse>();
 		storeHouseComboBox.setModel(new javax.swing.DefaultComboBoxModel<StoreHouse>());
 		for(StoreHouse sh:storeHouseList){
 			storeHouseComboBox.addItem(sh);
 		}
-		panel5.add(shLabel);
-		panel5.add(storeHouseComboBox);
+		baseInfoPanel.add(shLabel);
+		baseInfoPanel.add(storeHouseComboBox);
 		JLabel timeLabel = new JLabel("时间");
 		timeField = new JTextField(10);
 		timeField.setEditable(false);
-		panel5.add(timeLabel);
-		panel5.add(timeField);
+		baseInfoPanel.add(timeLabel);
+		baseInfoPanel.add(timeField);
+		
+		JLabel commentLabel = new JLabel("备注");
+		commentPanel.add(commentLabel);
+		commentField = new JTextField(20);
+		commentPanel.add(commentField);
 		
 		resetData();
 		goodsPanel = new SalesGoodsItemPanel(salesIdField.getText());
@@ -145,12 +160,19 @@ public class SalesFrame extends JInternalFrame
 		JPanel panelCommit = new JPanel();
 		JButton commitButton = new JButton("提交");
 		JButton commitAsDraftButton = new JButton("存为草稿");
+		printPanle = new PrintPanle();
+		printPanle.getPrintButton().addActionListener(new PrintAction());
+		
+		
 		commitAsDraftButton.addActionListener(new AddAsDraftAction());
 		commitButton.addActionListener(new SalesAddListener());
 		panelCommit.add(commitButton);
 		panelCommit.add(commitAsDraftButton);
+		panelCommit.add(printPanle);
 		
-		panel.add(panel5, BorderLayout.NORTH);
+		northPanel.add(baseInfoPanel, BorderLayout.NORTH);
+		northPanel.add(commentPanel, BorderLayout.SOUTH);
+		panel.add(northPanel, BorderLayout.NORTH);
 		panel.add(goodsPanel, BorderLayout.CENTER);
 		panel.add(panelCommit, BorderLayout.SOUTH);
 	
@@ -161,141 +183,46 @@ public class SalesFrame extends JInternalFrame
 		customerButton.setDiscount(discount);
 		goodsPanel.setDiscount(discount);
 	}
-	//设置部分控件为不可用状态
-	private void setEnableFalse()
-	{
-//		customerNameField.setEnabled(false);
-//		discountField.setEnabled(false);
-//		goodsField.setEnabled(false);
+	
+	public SalesIn createSalesIn(){
+		if((customer = customerButton.getCustomer())== null){
+			CommonUtil.showError("请选择一个客户");
+			return null;
+		}
+		if(storeHouseComboBox.getSelectedItem() == null){
+			CommonUtil.showError("请先选择一个仓库");
+			return null;
+		}
+		int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
+		List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(shId);
+		if(list == null|| list.size() == 0){
+			CommonUtil.showError("请选中一个商品");
+			return null;
+		}
+		String id = salesIdField.getText();
+		String time = timeField.getText();
+		String operator = operatorField.getText();
+		if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
+			CommonUtil.showError("超过客户销售限额");
+			return null;
+		}
+		SalesMan salesMan = salesManButton.getSalesMan();
+		String salesManName = "";
+		if(salesMan != null){
+			salesManName = salesMan.getName();
+		}
+		SalesIn sales = new SalesIn(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,commentField.getText(),0,
+				goodsPanel.getMoney(),goodsPanel.getDecreaseMoney(),shId, 1, salesManName, list);
+		return sales;
 	}
-
-	private void clearTextField()
-	{
-		goodsDiscountField.setText("");
-	}
-//	private class CustomerSearchAction implements ActionListener{
-//
-//		@Override
-//		public void actionPerformed(ActionEvent arg0) {
-//			// TODO Auto-generated method stub
-//			try {
-//				String customerName = customerNameField.getText();
-//				if(customerName.length()==0){
-//					JOptionPane.showMessageDialog(null,"请输入查询用户的名称","警告",JOptionPane.WARNING_MESSAGE);
-//					return;
-//				}
-//				customerList= customerHandler.searchCustomerByName(customerName);
-//				CommonUtil.updateJTable(customerTable, customerColumns, customerList.toArray(), customerFields);
-//			} catch (RemoteException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//				CommonUtil.showError("网络错误");
-//			}
-//		}
-//	}
-//	
-//	private class CustomerTableMouseListener implements MouseListener{
-//
-//		@Override
-//		public void mouseClicked(MouseEvent arg0) {
-//			// TODO Auto-generated method stub
-//			clearTextField();
-//			System.out.print(customerTable.getSelectedRow());
-//			if((customerTable.getSelectedRow()>=0)&&(customerTable.getSelectedRow()<customerList.size())){
-//				selectedCustomer = customerList.get(customerTable.getSelectedRow());
-//				try {
-//					discount = discountHandler.getDiscount(selectedCustomer.getId());
-//					if(discount!=null){
-//						goodsDiscountField.setText(discount.getDiscount()+"");
-//					}else{
-//						discount = new Discount();
-//						discount.setCustomerId(selectedCustomer.getId());
-//						discount.setDiscount(1);
-//						discountHandler.addDiscount(discount);
-//					}
-//				} catch (RemoteException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//					CommonUtil.showError("网络错误");
-//				}
-//			}
-//		}
-//
-//		@Override
-//		public void mouseEntered(MouseEvent arg0) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		@Override
-//		public void mouseExited(MouseEvent arg0) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		@Override
-//		public void mousePressed(MouseEvent arg0) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//
-//		@Override
-//		public void mouseReleased(MouseEvent arg0) {
-//			// TODO Auto-generated method stub
-//			
-//		}
-//		
-//	}
 	
 	private class SalesAddListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent arg0){
-			Customer customer;
-			if((customer = customerButton.getCustomer())== null){
-				CommonUtil.showError("请选择一个客户");
+			SalesIn sales = createSalesIn();
+			if(sales == null){
 				return;
 			}
-			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(shId);
-			if(list == null|| list.size() == 0){
-				CommonUtil.showError("请选中一个商品");
-				return;
-			}
-			String id = salesIdField.getText();
-			String time = timeField.getText();
-			String operator = operatorField.getText();
-//			double dis = discount.getDiscount();
-//			double price = selectedGoods.getPrice()*dis;
-//			NumberFormat nf = NumberFormat.getNumberInstance();
-//	        nf.setMaximumFractionDigits(2);
-//	        price = Double.parseDouble(nf.format(price));
-//			if(discount.getGoodsDiscount().containsKey(selectedGoods.getId())){
-//				dis = discount.getGoodsDiscount().get(selectedGoods.getId());
-//			}
-//			int number;
-//			try{
-//				number = Integer.parseInt(numberField.getText());
-//			}catch(Exception ex){
-//				CommonUtil.showError("数量必须为数字");
-//				return;
-//			}
-//			if(number <=0){
-//				CommonUtil.showError("数量必须大于0");
-//				return;
-//			}
-//			double money = price*number;
-//			String comment="";
-			if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
-				CommonUtil.showError("超过客户销售限额");
-				return;
-			}
-			SalesMan salesMan = salesManButton.getSalesMan();
-			String salesManName = "";
-			if(salesMan != null){
-				salesManName = salesMan.getName();
-			}
-			SalesIn sales = new SalesIn(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,"",0,
-					goodsPanel.getMoney(),goodsPanel.getDecreaseMoney(),shId, 1, salesManName, list);
 			try {
 				String result = salesHandler.addSalesIn(sales);
 				if(result == null){
@@ -316,7 +243,6 @@ public class SalesFrame extends JInternalFrame
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			Customer customer;
 			if((customer = customerButton.getCustomer())== null){
 				CommonUtil.showError("请选择一个客户");
 				return;
@@ -353,6 +279,26 @@ public class SalesFrame extends JInternalFrame
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				CommonUtil.showError("网络错误");
+			}
+		}
+		
+	}
+	private class PrintAction implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			SalesIn salesIn = createSalesIn();
+			if(salesIn == null || customer == null){
+				return;
+			}else{
+				Printer printer = new Printer();
+				if(printPanle.getPrintStyleComboBox().getSelectedIndex() == 0){
+					printer.init(salesIn, goodsPanel.getGoodsList(), customer, true);
+				}else{
+					printer.init(salesIn, goodsPanel.getGoodsList(), customer, false);
+				}
+				printer.print();
 			}
 		}
 		

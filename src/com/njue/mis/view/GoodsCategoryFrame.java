@@ -72,6 +72,11 @@ public class GoodsCategoryFrame extends CategoryFrame
 				GoodsFrame goodsFrame = new GoodsFrame(selected.getCate_id());
 				MainFrame.getMainFrame().getContentPane().add(goodsFrame);
 				goodsFrame.setVisible(true);
+				int index = table.getSelectedRow();
+				if(index<0||goodsList==null||index>=goodsList.size()||goodsList.get(index)==null){
+				}else{
+					goodsFrame.initWithGoods(goodsList.get(index));
+				}
 			}
 		});		
 		updateEntityButton.setText("更新商品");
@@ -80,13 +85,41 @@ public class GoodsCategoryFrame extends CategoryFrame
 			public void actionPerformed(ActionEvent arg0) {
 				int index = table.getSelectedRow();
 				if(index<0||goodsList==null||index>=goodsList.size()||goodsList.get(index)==null){
-					CommonUtil.showError("请选择一个客户");
+					CommonUtil.showError("请选择一个商品!");
 					return;
 				}else{
 					GoodsFrame goodsFrame = new GoodsFrame(goodsList.get(index));
 					MainFrame.getMainFrame().getContentPane().add(goodsFrame);
 					goodsFrame.setVisible(true);
 				}
+			}
+		});
+		deleteEntityButton.setText("删除商品");
+		deleteEntityButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				int index = table.getSelectedRow();
+				if(index<0||goodsList==null||index>=goodsList.size()||goodsList.get(index)==null){
+					CommonUtil.showError("请选择一个商品!");
+					return;
+				}else{
+					try {
+						if(!goodsService.deleteGoods(goodsList.get(index))){
+							CommonUtil.showError("商品不能被删除");
+							return;
+						}else{
+							goodsList.remove(index);
+							CommonUtil.showError("删除成功");
+							rePaintTable();
+						}
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
 			}
 		});
         addButton.addActionListener( new ActionListener(){
@@ -215,7 +248,6 @@ public class GoodsCategoryFrame extends CategoryFrame
 					if(goodsList != null){
 						CommonUtil.updateJTable(table, objects, goodsList.toArray(), fieldsToShow);
 					}
-					table.repaint();
 				} catch (RemoteException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -247,5 +279,11 @@ public class GoodsCategoryFrame extends CategoryFrame
 			// TODO Auto-generated method stub
 			
 		}
+    }
+    
+    public void rePaintTable(){
+		if(goodsList != null){
+			CommonUtil.updateJTable(table, objects, goodsList.toArray(), fieldsToShow);
+		};
     }
 }

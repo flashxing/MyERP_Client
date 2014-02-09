@@ -29,6 +29,10 @@ public class Configure {
 	public static String MoneyController = null;
 	public static String CardItemController = null;
 	public static String SalesManController = null;
+	public static String SetupGoodsController = null;
+	public static String SetupCustomerController = null;
+	public static String SetupController = null;
+
 //	public final static String IP = "localhost:3333";
 	public final static int init(){
 		propertie = new Properties();
@@ -57,6 +61,9 @@ public class Configure {
 			MoneyController = "rmi://"+getValue("URL")+"/MoneyController";
 			CardItemController = "rmi://"+getValue("URL")+"/CardItemController";
 			SalesManController = "rmi://"+getValue("URL")+"/SalesManController";
+			SetupGoodsController ="rmi://"+getValue("URL")+"/SetupGoodsController";
+			SetupCustomerController = "rmi://"+getValue("URL")+"/SetupCustomerController";
+			SetupController = "rmi://"+getValue("URL")+"/SetupController";
 			inputFile.close();
 			return 1;
 		}catch(Exception ex){

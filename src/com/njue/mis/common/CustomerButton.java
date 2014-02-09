@@ -19,9 +19,11 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -95,6 +97,8 @@ public class CustomerButton extends JButton{
 	    
 	    protected DefaultMutableTreeNode clickNode;
 	    private CustomerCategory selected;
+	    private JTextField nameField;
+	    private JButton searchButton;
 	    public CustomerChooser(){
 			super();
 			init();
@@ -163,7 +167,19 @@ public class CustomerButton extends JButton{
 	        goodScrollPane.setViewportView(table);
 	        goodScrollPane.setPreferredSize(new Dimension(screenSize.width * 2 / 3,
 					screenSize.height * 1/8));
-	        add(goodScrollPane, BorderLayout.CENTER);
+	        
+	        JPanel searchPanel = new JPanel();
+	        JLabel nameLabel = new JLabel("");
+	        nameField = new JTextField(10);
+	        searchButton = new JButton("查询");
+	        searchButton.addActionListener(new SearchAction());
+	        searchPanel.add(nameLabel);
+	        searchPanel.add(nameField);
+	        searchPanel.add(searchButton);
+	        JPanel rightPanel = new JPanel(new BorderLayout());
+	        rightPanel.add(searchPanel, BorderLayout.NORTH);
+	        rightPanel.add(goodScrollPane, BorderLayout.CENTER);
+	        add(rightPanel, BorderLayout.CENTER);
 	        add(scrollPane,BorderLayout.WEST);
 		}
 		@Override
@@ -248,6 +264,24 @@ public class CustomerButton extends JButton{
 				
 			}
 	    }
+		private class SearchAction implements ActionListener{
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String customerName = nameField.getText();
+				if(customerName.length()<=0){
+					CommonUtil.showError("搜索关键词不能为空");
+					return;
+				}
+				try {
+					customerList = customerService.searchCustomerByName(customerName);
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				CommonUtil.updateJTable(table, columns, customerList.toArray(), fields);
+			}
+		}
 
 	}
 	

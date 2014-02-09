@@ -38,6 +38,7 @@ public class CategoryFrame extends JInternalFrame
     protected JButton updateButton;
     protected JButton addGoodsButton;
     protected JButton updateEntityButton;
+    protected JButton deleteEntityButton;
     protected DefaultMutableTreeNode clickNode;
     protected DefaultMutableTreeNode root;
     protected JTextField insertField;
@@ -65,17 +66,20 @@ public class CategoryFrame extends JInternalFrame
 		addButton.setEnabled(true);
 		removeButton.setEnabled(true);
 		addGoodsButton.setEnabled(true);
+		deleteEntityButton.setEnabled(true);
 	}
 	protected void enableAllButAddButton(){
 		updateButton.setEnabled(true);
 		removeButton.setEnabled(true);
 		addGoodsButton.setEnabled(true);
+		deleteEntityButton.setEnabled(true);
 	}
 	
 	protected void disableButton(){
 		updateButton.setEnabled(false);
 		removeButton.setEnabled(false);	
 		addGoodsButton.setEnabled(false);
+		deleteEntityButton.setEnabled(false);
 	}
 	public void init(final List<Category> list)
 	{
@@ -103,7 +107,8 @@ public class CategoryFrame extends JInternalFrame
         updateButton = new JButton("更新分类");
 
         removeButton = new JButton ("删除分类");
-        insertField = new JTextField(20);
+        deleteEntityButton = new JButton();
+        insertField = new JTextField(10);
         updateField = new JTextField(10);
         panel = new JPanel ();
         disableButton();
@@ -114,6 +119,7 @@ public class CategoryFrame extends JInternalFrame
         panel.add(updateButton);
         panel.add(addGoodsButton);
         panel.add(updateEntityButton);
+        panel.add(deleteEntityButton);
 
        
         table = CommonUtil.createTable(objects,initList,fieldsToShow);
@@ -184,7 +190,12 @@ public class CategoryFrame extends JInternalFrame
         return root;
     }
     private class MyRenderer extends DefaultTreeCellRenderer{
-    	public Component getTreeCellRendererComponent(JTree tree, Object value,boolean sel, boolean expanded, boolean leaf, int row,boolean hasFocus) 
+    	/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2953626780476944067L;
+
+		public Component getTreeCellRendererComponent(JTree tree, Object value,boolean sel, boolean expanded, boolean leaf, int row,boolean hasFocus) 
     	{
     		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,row, hasFocus);
     		setLeafIcon(image);//叶子结点图片

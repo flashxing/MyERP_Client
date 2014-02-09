@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.font.NumericShaper;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +106,7 @@ public class GoodsItemPanel extends JPanel{
         scrollPane.setViewportView(table);
         scrollPane.setPreferredSize(new Dimension(screenSize.width * 3 / 5,
 				screenSize.height * 1/5));
-        add(north, BorderLayout.NORTH);
+        add(north, BorderLayout.SOUTH);
         add(scrollPane, BorderLayout.CENTER);
 	}
 	public List<GoodsItem> getGoodsItemList(){

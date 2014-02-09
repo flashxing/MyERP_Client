@@ -93,8 +93,8 @@ public class GoodsButton extends JButton{
 	    protected JScrollPane scrollPane;
 	    
 	    private JTable table;
-	    private String[] columns = {"商品编码","商品名称","型号","规格","数量","零售价","最近销售价","最近进价"};
-	    private String[] fields = {"productCode","goodsName","description","size","goodsNum","price","lastSalePrice","lastStockPrice"};
+	    private String[] columns = {"商品名称","型号","数量","销售价","最近销售价"};
+	    private String[] fields = {"goodsName","description","goodsNum","salesPrice","lastSalePrice"};
 	    private JScrollPane goodScrollPane;
 	    
 	    protected DefaultMutableTreeNode clickNode;
@@ -134,7 +134,7 @@ public class GoodsButton extends JButton{
 	        simpleTree.setRootVisible(false);
 	        simpleTree.setShowsRootHandles(true);
 	        simpleTree.setMaximumSize(new Dimension(screenSize.width * 2 / 3-60,
-					screenSize.height  / 80));
+					screenSize.height  / 8));
 	        simpleTree.addMouseListener(new ClickNodeActionListener());
 
 	        scrollPane = new JScrollPane( simpleTree );
@@ -159,9 +159,9 @@ public class GoodsButton extends JButton{
 	        goodScrollPane = new JScrollPane();
 	        goodScrollPane.setViewportView(table);
 	        goodScrollPane.setPreferredSize(new Dimension(screenSize.width * 2 / 3,
-					screenSize.height * 1/80));
+					screenSize.height * 1/8));
 	        JPanel searchPanel = new JPanel();
-	        JLabel nameLabel = new JLabel("商品名称");
+	        JLabel nameLabel = new JLabel("");
 	        nameField = new JTextField(10);
 	        searchButton = new JButton("查询");
 	        searchButton.addActionListener(new SearchAction());

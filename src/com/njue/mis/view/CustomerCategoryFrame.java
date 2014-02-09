@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -74,6 +75,35 @@ public class CustomerCategoryFrame extends CategoryFrame
 			}
 		});
 		updateEntityButton.setText("更新客户");
+		deleteEntityButton.setText("删除客户");
+		deleteEntityButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				int index = table.getSelectedRow();
+				if(index<0||customerList==null||index>=customerList.size()||customerList.get(index)==null){
+					CommonUtil.showError("请选择一个客户!");
+					return;
+				}else{
+					try {
+						if(!customerService.deleteCustomer(customerList.get(index).getId())){
+							CommonUtil.showError("商品不能被删除");
+							return;
+						}else{
+							customerList.remove(index);
+							
+							CommonUtil.showError("删除成功");
+							rePaintTable();
+						}
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		});
 		updateEntityButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -256,4 +286,17 @@ public class CustomerCategoryFrame extends CategoryFrame
 		}
     }
 
+    public void rePaintTable(){
+		if(customerList != null){
+			List<CustomerMoney> customerMoneyList = new ArrayList<>();
+			for(Customer customer:customerList){
+				if(customer.getCustomerMoney() == null){
+					customerMoneyList.add(new CustomerMoney(customer.getId(), 0 , 0));
+				}else{
+					customerMoneyList.add(customer.getCustomerMoney());
+				}
+			}
+			CommonUtil.updateJTable(table, objects, fieldsToShow, customerList.toArray(), customerMoneyList.toArray());
+		};
+    }
 }

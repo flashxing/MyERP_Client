@@ -134,34 +134,34 @@ public class CardItemButton extends JButton{
 	        JLabel numberLabel = new JLabel("’À∫≈");
 	        numberField = new JTextField(20);
 	        addButton = new JButton("ÃÌº”");
-	        addButton.addActionListener(new ActionListener() {
-				
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					// TODO Auto-generated method stub
-					String item = itemField.getText();
-					String number = numberField.getText();
-					if(item.length()<=0 || number.length()<=0){
-						CommonUtil.showError("«Î ‰»Î“¯––∫Õ’À∫≈");
-						return;
-					}
-					CardItem cardItem = new CardItem(item, number);
-					try {
-						if(cardItemService.addCardItem(cardItem) == null){
-							CommonUtil.showError("ÃÌº” ß∞‹,«Î≤Èø¥ «∑Ò÷ÿ∏¥");
-							return;
-						}
-						cardItemList.add(cardItem);
-						CommonUtil.updateJTable(table, columns, cardItemList.toArray(), fields);
-						itemField.setText("");
-						numberField.setText("");
-					} catch (RemoteException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						CommonUtil.showError("Õ¯¬Á¥ÌŒÛ");
-					}
-				}
-			});
+//	        addButton.addActionListener(new ActionListener() {
+//				
+//				@Override
+//				public void actionPerformed(ActionEvent arg0) {
+//					// TODO Auto-generated method stub
+//					String item = itemField.getText();
+//					String number = numberField.getText();
+//					if(item.length()<=0 || number.length()<=0){
+//						CommonUtil.showError("«Î ‰»Î“¯––∫Õ’À∫≈");
+//						return;
+//					}
+//					CardItem cardItem = new CardItem(item, number);
+//					try {
+//						if(cardItemService.addCardItem(cardItem) == null){
+//							CommonUtil.showError("ÃÌº” ß∞‹,«Î≤Èø¥ «∑Ò÷ÿ∏¥");
+//							return;
+//						}
+//						cardItemList.add(cardItem);
+//						CommonUtil.updateJTable(table, columns, cardItemList.toArray(), fields);
+//						itemField.setText("");
+//						numberField.setText("");
+//					} catch (RemoteException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//						CommonUtil.showError("Õ¯¬Á¥ÌŒÛ");
+//					}
+//				}
+//			});
 	        panel_input.add(itemLabel);
 	        panel_input.add(itemField);
 	        panel_input.add(numberLabel);

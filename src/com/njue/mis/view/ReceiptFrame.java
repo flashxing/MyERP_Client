@@ -36,6 +36,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -168,7 +170,6 @@ public class ReceiptFrame extends JInternalFrame
 					CommonUtil.showError("金额必须为正");
 				}
 			}catch(Exception ex){
-				CommonUtil.showError("第几"+i+"行金额未输入,此行抛弃");
 				continue;
 			}
 			String item_comment = (String) model.getValueAt(i, 3);
@@ -240,6 +241,14 @@ public class ReceiptFrame extends JInternalFrame
 			}
 		};
 		table = new JTable(model);
+		table.getModel().addTableModelListener(new TableModelListener() {
+			
+			@Override
+			public void tableChanged(TableModelEvent arg0) {
+				double money = calTotalMoney();
+				moneyField.setText(""+money);
+			}
+		});
 		CommonUtil.setDuiqi(table);
 		table.setModel(model);
 		table.setRowSelectionAllowed(false);
@@ -273,7 +282,15 @@ public class ReceiptFrame extends JInternalFrame
 		panelButton.add(addButton);
 		panelButton.add(cacelButton);
 		
-		panel.add(panelButton, BorderLayout.SOUTH);
+		JPanel totalPanel = new JPanel();
+		totalPanel.add(moneyLabel);
+		totalPanel.add(moneyField);
+		
+		JPanel southPanel = new JPanel(new BorderLayout());
+		southPanel.add(totalPanel, BorderLayout.NORTH);
+		southPanel.add(panelButton, BorderLayout.SOUTH);
+		
+		panel.add(southPanel, BorderLayout.SOUTH);
 		return panel;
 	}
 	
@@ -325,5 +342,23 @@ public class ReceiptFrame extends JInternalFrame
 			model.removeRow(index);
 		}
 		
+	}
+	
+	private double calTotalMoney(){
+		double money = 0;
+		for(int i = 0; i < model.getRowCount(); i++){
+			double item_money;
+			try{
+				item_money = Double.parseDouble((String) model.getValueAt(i, 2));
+				money+=item_money;
+				if(money<0){
+					CommonUtil.showError("金额必须为正");
+				}
+			}catch(Exception ex){
+				continue;
+			}
+		}
+		money = CommonUtil.formateDouble(money);
+		return money;
 	}
 }

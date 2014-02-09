@@ -9,7 +9,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.model.User;
@@ -17,6 +16,10 @@ import com.njue.mis.model.User;
 
 public class MainFrame extends JFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4604309468168777924L;
 	public static String power;
 	public static String username;
 	public static User user;
@@ -78,6 +81,23 @@ public class MainFrame extends JFrame
 			menu.add(menuItem);
 			menuItem = new JMenuItem("折扣管理");
 			menuItem.addActionListener(MainAction.clickDiscountManager());
+			menu.add(menuItem);
+		}
+		
+		if(CommonUtil.hasPermisson(user, "期初建账")){
+			menu = new JMenu("期初建账");
+			menuBar.add(menu);
+			menuItem = new JMenuItem("商品期初建账");
+			menuItem.addActionListener(MainAction.setUpGoods());
+			menu.add(menuItem);
+			menuItem = new JMenuItem("客户期初建账");
+			menuItem.addActionListener(MainAction.setUpCustomer());
+			menu.add(menuItem);
+			menuItem = new JMenuItem("账户期初建账");
+			menuItem.addActionListener(MainAction.setUpCardItem());
+			menu.add(menuItem);
+			menuItem = new JMenuItem("开始建账");
+			menuItem.addActionListener(MainAction.beginSetup());
 			menu.add(menuItem);
 		}
 		

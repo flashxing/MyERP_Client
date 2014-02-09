@@ -18,6 +18,8 @@ import javax.swing.JTextField;
 
 import com.njue.mis.client.RemoteService;
 import com.njue.mis.common.CommonUtil;
+import com.njue.mis.common.PrintPanle;
+import com.njue.mis.common.Printer;
 import com.njue.mis.common.SalesGoodsItemPanel;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.DiscountControllerInterface;
@@ -56,6 +58,9 @@ public class SalesDraftEditFrame extends JInternalFrame
 	private Discount discount;
 	private Customer customer;
 	private JTextField timeField;
+	private JTextField commentField;
+	
+	private PrintPanle printPanle;
 	
 	private SalesIn salesIn;
 	
@@ -118,6 +123,12 @@ public class SalesDraftEditFrame extends JInternalFrame
 		panel5.add(timeLabel);
 		panel5.add(timeField);
 		
+		JLabel commentLabel = new JLabel("备注");
+		panel5.add(commentLabel);
+		commentField = new JTextField(20);
+		commentField.setText(salesIn.getComment());
+		panel5.add(commentField);
+		
 		goodsPanel = new SalesGoodsItemPanel(salesIn.getId());
 		goodsPanel.initWithGoodsList(salesIn);
 		initDiscount();
@@ -128,6 +139,9 @@ public class SalesDraftEditFrame extends JInternalFrame
 		commitButton.addActionListener(new SalesAddListener());
 		panelCommit.add(commitButton);
 		panelCommit.add(commitAsDraftButton);
+		printPanle = new PrintPanle();
+		panelCommit.add(printPanle);
+		printPanle.getPrintButton().addActionListener(new PrintAction());
 		
 		panel.add(panel5, BorderLayout.NORTH);
 		panel.add(goodsPanel, BorderLayout.CENTER);
@@ -138,31 +152,29 @@ public class SalesDraftEditFrame extends JInternalFrame
 	private void initDiscount(){ 
 		goodsPanel.setDiscount(discount);
 	}
-	
+	private boolean updateSalesIn(){
+		int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
+		if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
+			CommonUtil.showError("超过客户销售限额");
+			return false;
+		}
+		salesIn.setTotalPrice(goodsPanel.getMoney());
+		salesIn.setDecreasePrice(goodsPanel.getDecreaseMoney());
+		salesIn.setPrice(goodsPanel.getActualPrice());
+		if(goodsPanel.getGoodsItemList(shId) == null){
+			CommonUtil.showError("库存不足");
+			return false;
+		}
+		salesIn.setComment(commentField.getText());
+		salesIn.setGoodsItemsList(goodsPanel.getGoodsItemList(shId));
+		return true;
+	}
 	private class SalesAddListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent arg0){
-			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-//			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(shId);
-//			if(list == null|| list.size() == 0){
-//				CommonUtil.showError("请选中一个商品");
-//				return;
-//			}
-//			String id = salesIdField.getText();
-//			String time = timeField.getText();
-//			String operator = operatorField.getText();
-			if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
-				CommonUtil.showError("超过客户销售限额");
-				return;
+			if (!updateSalesIn()){
+				return ;
 			}
-			salesIn.setTotalPrice(goodsPanel.getMoney());
-			salesIn.setDecreasePrice(goodsPanel.getDecreaseMoney());
-			salesIn.setPrice(goodsPanel.getActualPrice());
-			if(goodsPanel.getGoodsItemList(shId) == null){
-				CommonUtil.showError("库存不足");
-				return;
-			}
-			salesIn.setGoodsItemsList(goodsPanel.getGoodsItemList(shId));
 			try {
 				if(!salesService.setSalesToPublished(salesIn)){
 					CommonUtil.showError("添加销售单失败,可能库存不足");
@@ -181,27 +193,9 @@ public class SalesDraftEditFrame extends JInternalFrame
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-//			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(shId);
-//			if(list == null|| list.size() == 0){
-//				CommonUtil.showError("请选中一个商品");
-//				return;
-//			}
-//			String id = salesIdField.getText();
-//			String time = timeField.getText();
-//			String operator = operatorField.getText();
-			if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
-				CommonUtil.showError("超过客户销售限额");
+			if(!updateSalesIn()){
 				return;
 			}
-			salesIn.setTotalPrice(goodsPanel.getMoney());
-			salesIn.setDecreasePrice(goodsPanel.getDecreaseMoney());
-			salesIn.setPrice(goodsPanel.getActualPrice());
-			if(goodsPanel.getGoodsItemList(shId) == null){
-				CommonUtil.showError("库存不足");
-				return;
-			}
-			salesIn.setGoodsItemsList(goodsPanel.getGoodsItemList(shId));
 			try {
 				if(!salesService.updateSales(salesIn)){
 					CommonUtil.showError("更新业务单稿失败,可能库存不足");
@@ -215,6 +209,24 @@ public class SalesDraftEditFrame extends JInternalFrame
 				e1.printStackTrace();
 				CommonUtil.showError("网络错误");
 			}
+		}
+		
+	}
+	private class PrintAction implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if(!updateSalesIn()){
+				return;
+			}
+			Printer printer = new Printer();
+			if(printPanle.getPrintStyleComboBox().getSelectedIndex() == 0){
+				printer.init(salesIn, goodsPanel.getGoodsList(), customer, true);
+			}else{
+				printer.init(salesIn, goodsPanel.getGoodsList(), customer, false);
+			}
+			printer.print();
 		}
 		
 	}

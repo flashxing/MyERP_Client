@@ -47,9 +47,8 @@ public class CommonUtil {
 		}
 //		columns[column.length] = "Ìí¼Ó";
 		DefaultTableModel model = new DefaultTableModel(columns, 0);
-		List<Class<?>> list = null;
+		List<Class<?>> list = new ArrayList<>();
 		if(object.length > 0){
-			list = new ArrayList<Class<?>>();
 			for(int i = 0; i < objects.length; ++i){
 				list.add(objects[i][0].getClass());
 			}
@@ -433,7 +432,16 @@ public class CommonUtil {
     	}
     	return result;
     }
-    
+    public static double formateDouble(String string){
+    	double result = 0.0;
+    	try{
+    		result = Double.parseDouble(df.format(Double.parseDouble(string)));
+    	}catch(Exception exception){
+    		exception.printStackTrace();
+    		return -1;
+    	}
+    	return result;
+    }
     public static double formateDouble(double number){
     	return Double.parseDouble(df.format(number));
     }

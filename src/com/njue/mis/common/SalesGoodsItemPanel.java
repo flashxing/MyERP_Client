@@ -22,6 +22,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import com.njue.mis.client.RemoteService;
 import com.njue.mis.interfaces.GoodsControllerInterface;
@@ -36,6 +37,7 @@ public class SalesGoodsItemPanel extends JPanel{
 	private String portId;
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	private List<SalesGoodsItem> goodsItemList;
+	private List<Goods> goodsList = new ArrayList<>();
 	private JButton addButton;
 	private JButton deleteButton;
 	private JTextField totalMoneyField;
@@ -44,7 +46,7 @@ public class SalesGoodsItemPanel extends JPanel{
 	protected JTable table;
 	protected DefaultTableModel model;
 	protected JScrollPane scrollPane;
-	protected String[] columns = {"编号","商品","数量","单价","总价","备注"};
+	protected String[] columns = {"编号","商品名称","数量","单价","总价","备注"};
 	protected double money;
 	protected Discount discount;
 	private DecimalFormat df=new DecimalFormat(".##");
@@ -62,7 +64,7 @@ public class SalesGoodsItemPanel extends JPanel{
 		stockService = RemoteService.stockService;
 		goodsService = RemoteService.goodsService;
 		setLayout(new BorderLayout());
-		setSize(screenSize.width * 3/5, screenSize.height*2/5);
+		setSize(screenSize.width * 3/5, screenSize.height*2/7);
 		JPanel north = new JPanel();
 		JLabel label = new JLabel("总额:");
 		totalMoneyField = new JTextField(8);
@@ -114,7 +116,7 @@ public class SalesGoodsItemPanel extends JPanel{
 					if(priceObject != null&&!priceObject.equals("")){
 						continue;
 					}
-					double price = goods.getLastStockPrice();
+					double price = goods.getSalesPrice();
 					if(discount != null){
 						price = price*discount.getDiscount(goods.getId());
 					}
@@ -132,19 +134,21 @@ public class SalesGoodsItemPanel extends JPanel{
         scrollPane.setViewportView(table);
         scrollPane.setPreferredSize(new Dimension(screenSize.width * 3 / 5,
 				screenSize.height * 1/5));
-        add(north, BorderLayout.NORTH);
+        add(north, BorderLayout.SOUTH);
         add(scrollPane, BorderLayout.CENTER);
 	}
 	public List<SalesGoodsItem> getGoodsItemList(int shId){
 		money = 0;
 		this.shId = shId;
 		goodsItemList.clear();
+		goodsList.clear();
 		for(int i = 0; i < model.getRowCount(); i++){
 			int itemId = (Integer) model.getValueAt(i, 0);
 			Goods goods = (Goods) model.getValueAt(i, 1);
 			if(goods == null){
 				continue;
 			}
+			goodsList.add(goods);
 			int number;
 			double item_money;
 			try{
@@ -238,7 +242,7 @@ public class SalesGoodsItemPanel extends JPanel{
 			try{
 				number = Integer.parseInt((String)model.getValueAt(i, 2));
 				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, 3))));
-				total_price = number*item_money;
+				total_price = CommonUtil.formateDouble(number*item_money);
 				money+=total_price;
 				money=Double.parseDouble(df.format((money)));
 				System.out.println(money);
@@ -343,5 +347,11 @@ public class SalesGoodsItemPanel extends JPanel{
 //		decreasePriceField.setText(""+salesIn.getDecreasePrice());
 //		actualPriceField.setText(""+salesIn.getPrice());
 		return true;
+	}
+	public TableModel getModel(){
+		return table.getModel();
+	}
+	public List<Goods> getGoodsList(){
+		return goodsList;
 	}
 }

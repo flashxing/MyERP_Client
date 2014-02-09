@@ -6,6 +6,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.njue.mis.interfaces.CardItemControllerInterface;
+import com.njue.mis.interfaces.CategoryControllerInterface;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.DiscountControllerInterface;
 import com.njue.mis.interfaces.GoodsControllerInterface;
@@ -15,6 +16,9 @@ import com.njue.mis.interfaces.PortControllerInterface;
 import com.njue.mis.interfaces.ReceiptControllerInterface;
 import com.njue.mis.interfaces.SalesControllerInterface;
 import com.njue.mis.interfaces.SalesManControllerInterface;
+import com.njue.mis.interfaces.SetupControllerInterface;
+import com.njue.mis.interfaces.SetupCustomerControllerInterface;
+import com.njue.mis.interfaces.SetupGoodsControllerInterface;
 import com.njue.mis.interfaces.StockControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 
@@ -31,6 +35,10 @@ public class RemoteService {
 	public static MoneyControllerInterface moneyService;
 	public static GoodsItemControllerInterface goodsItemService;
 	public static SalesManControllerInterface salesManService;
+	public static CategoryControllerInterface categoryService;
+	public static SetupGoodsControllerInterface setupGoodsService;
+	public static SetupCustomerControllerInterface setupCustomerService;
+	public static SetupControllerInterface setupService;
 	public static int load(){
 		try {
 			cardItemService = (CardItemControllerInterface) Naming.lookup(Configure.CardItemController);
@@ -45,6 +53,10 @@ public class RemoteService {
 			moneyService = (MoneyControllerInterface) Naming.lookup(Configure.MoneyController);
 			goodsItemService = (GoodsItemControllerInterface)Naming.lookup(Configure.GoodsItemController);
 			salesManService = (SalesManControllerInterface) Naming.lookup(Configure.SalesManController);
+			categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
+			setupGoodsService = (SetupGoodsControllerInterface) Naming.lookup(Configure.SetupGoodsController);
+			setupCustomerService = (SetupCustomerControllerInterface) Naming.lookup(Configure.SetupCustomerController);
+			setupService = (SetupControllerInterface) Naming.lookup(Configure.SetupController);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

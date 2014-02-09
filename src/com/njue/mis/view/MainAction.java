@@ -9,7 +9,10 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
+import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.CategoryControllerInterface;
+import com.njue.mis.interfaces.SetupControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Category;
 import com.njue.mis.model.StoreHouse;
@@ -25,18 +28,12 @@ public class MainAction
 			public void actionPerformed(ActionEvent e)
 			{
 				try {
-					CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
+					CategoryControllerInterface categoryService = RemoteService.categoryService;
 					List<Category> list = categoryService.getAllCustomerCategory();
 					CustomerCategoryFrame customerFrame = new CustomerCategoryFrame(list);
 					MainFrame.getMainFrame().getContentPane().add(customerFrame);
 					customerFrame.setVisible(true);
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				} catch (RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (NotBoundException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
@@ -51,24 +48,15 @@ public class MainAction
 			public void actionPerformed(ActionEvent e)
 			{
 				try {
-					CategoryControllerInterface categoryService = (CategoryControllerInterface) Naming.lookup(Configure.CategoryController);
+					CategoryControllerInterface categoryService = RemoteService.categoryService;
 					List<Category> list = categoryService.getAllGoodsCategory();
 					GoodsCategoryFrame categoryFrame = new GoodsCategoryFrame(list);
 					MainFrame.getMainFrame().getContentPane().add(categoryFrame);
 					categoryFrame.setVisible(true);
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				} catch (RemoteException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				} catch (NotBoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				}
-//				GoodsFrame goodsFrame = new GoodsFrame();
-//				MainFrame.getMainFrame().getContentPane().add(goodsFrame);
-//				goodsFrame.setVisible(true);
 			}
 		};
 	}
@@ -567,6 +555,67 @@ public class MainAction
 			}
 		};
 
+	}
+	
+	public static ActionListener setUpGoods() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				SetupGoodsFrame setupGoodsFrame = new SetupGoodsFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						setupGoodsFrame);
+				setupGoodsFrame.setVisible(true);
+			}
+		};
+
+	}
+	
+	public static ActionListener setUpCustomer() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				SetupCustomerFrame setupCustomerFrame = new SetupCustomerFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						setupCustomerFrame);
+				setupCustomerFrame.setVisible(true);
+			}
+		};
+
+	}
+	
+	public static ActionListener setUpCardItem() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				CardItemFrame cardItemFrame = new CardItemFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						cardItemFrame);
+				cardItemFrame.setVisible(true);
+			}
+		};
+
+	}
+	
+	public static ActionListener beginSetup(){
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				SetupControllerInterface setupService = RemoteService.setupService;
+				try {
+					if(setupService.setUp()){
+						CommonUtil.showError("ÆÚ³õ½¨¿â³É¹¦");
+					}else{
+						CommonUtil.showError("½¨¿âÊ§°Ü");
+					}
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					CommonUtil.showError("ÍøÂç´íÎó");
+				}
+			}
+		};
 	}
 
 }

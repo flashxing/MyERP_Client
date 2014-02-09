@@ -11,4 +11,5 @@ public interface CardItemControllerInterface extends Remote{
 	public boolean deleteCardItem(CardItem cardItem) throws RemoteException;
 	public boolean updateCardItem(CardItem cardItem) throws RemoteException;
 	public List<CardItem> getAllCardItems() throws RemoteException;
+	public boolean saveOrUpdateCardItems(List<CardItem> cardItemList) throws RemoteException;
 }

@@ -78,7 +78,7 @@ public abstract class ValidationManager
 	 */
 	public static boolean validatePrice(String price)
 	{
-		String eL= "\\d+(.\\d+)"; 
+		String eL= "\\d+(.\\d+)?"; 
 		Pattern p = Pattern.compile(eL);
 		Matcher m = p.matcher(price);    
         boolean result = m.matches();   

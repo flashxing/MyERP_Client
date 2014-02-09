@@ -34,8 +34,8 @@ public class SalesDraftFrame extends JInternalFrame{
 	protected JTable table;
 	
 	private List<SalesIn> salesList;
-	protected String[] salesColumns={"编号","客户","商品","金额","操作人","时间"};
-	protected String[] salesFields={"id","customerId","goodsId","totalPrice","operatePerson","time"};
+	protected String[] salesColumns={"编号","客户","金额","操作人","时间"};
+	protected String[] salesFields={"id","customerId","totalPrice","operatePerson","time"};
 	
 	protected SalesControllerInterface salesService;
 	

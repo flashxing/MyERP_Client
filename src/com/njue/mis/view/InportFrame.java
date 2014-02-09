@@ -30,6 +30,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import com.lowagie.text.pdf.BidiOrder;
 import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
@@ -54,6 +55,7 @@ public class InportFrame extends JInternalFrame
 	private JTextField operaterField;
 	private JTextField goodsField;
 	private JTextField goodsNameField;
+	private JTextField commentField;
 	private Vector<Goods> goodsVec;
 	private List<StoreHouse> storeHouseList;
 	private PortControllerInterface portInService;
@@ -95,20 +97,20 @@ public class InportFrame extends JInternalFrame
 			return null;
 		}
 		JPanel panel = new JPanel(new BorderLayout());
+		JPanel northPanel = new JPanel(new BorderLayout());
 		panel.setSize(screenSize.width * 3 / 5,
 				screenSize.height * 3 / 5);
-		JPanel panel1 = new JPanel();
+		JPanel baseInfoPanel = new JPanel();
 		JLabel ID_importlable = new JLabel("进货票号:");
 		ID_importtextField = new JTextField(10);
 		JLabel customerLabel = new JLabel("供应商:");
 		customerButton = new CustomerButton("...");
 		customerButton.setSize(5, 5);
-		panel1.add(ID_importlable);
-		panel1.add(ID_importtextField);
-		panel1.add(customerLabel);
-		panel1.add(customerButton);
+		baseInfoPanel.add(ID_importlable);
+		baseInfoPanel.add(ID_importtextField);
+		baseInfoPanel.add(customerLabel);
+		baseInfoPanel.add(customerButton);
 		
-		JPanel panel2 = new JPanel();
 		JLabel paytypeLabel = new JLabel("仓库选择:");
 		storeHouseComboBox = new JComboBox();
 		storeHouseComboBox.setModel(new javax.swing.DefaultComboBoxModel(storeHouseList.toArray()));
@@ -116,13 +118,19 @@ public class InportFrame extends JInternalFrame
 		importtimeField = new JTextField(10);	
 		JLabel opreaterLabel = new JLabel("操作员:");
 		operaterField = new JTextField(10);
-		panel2.add(paytypeLabel);
-		panel2.add(storeHouseComboBox);
-		panel2.add(importtimeLabel);
-		panel2.add(importtimeField);
-		panel2.add(opreaterLabel);
-		panel2.add(operaterField);
-		
+		baseInfoPanel.add(paytypeLabel);
+		baseInfoPanel.add(storeHouseComboBox);
+		baseInfoPanel.add(importtimeLabel);
+		baseInfoPanel.add(importtimeField);
+		baseInfoPanel.add(opreaterLabel);
+		baseInfoPanel.add(operaterField);
+		JPanel commentPanel = new JPanel();
+		JLabel commentLabel = new JLabel("备注");
+		commentField = new JTextField(20);
+		commentPanel.add(commentLabel);
+		commentPanel.add(commentField);
+		northPanel.add(baseInfoPanel, BorderLayout.NORTH);
+		northPanel.add(commentPanel, BorderLayout.SOUTH);
 		initBase();
 		panelGoods = new GoodsItemPanel(ID_importtextField.getText());
 		JPanel panel3 = new JPanel();
@@ -224,7 +232,7 @@ public class InportFrame extends JInternalFrame
 				}
 				String customerId = customerButton.getCustomerId();				
 				PortIn portIn=new PortIn(inportID,"",shId,0,
-						                  panelGoods.getMoney(),inportTime,operator,"",customerId,panelGoods.getGoodsItemList());
+						                  panelGoods.getMoney(),inportTime,operator,commentField.getText(),customerId,panelGoods.getGoodsItemList());
 				
 				try {
 					if (portInService.addPortIn(portIn)!=null)
@@ -250,8 +258,7 @@ public class InportFrame extends JInternalFrame
 		
 		setEnableFalse();  
 		panel4.add(inButton);
-		panel1.add(panel2);
-		panel.add(panel1,BorderLayout.NORTH);
+		panel.add(northPanel,BorderLayout.NORTH);
 //		panel.add(panelSearch);
 		panel.add(panelGoods, BorderLayout.CENTER);
 		panel.add(panel4,BorderLayout.SOUTH);
@@ -279,50 +286,5 @@ public class InportFrame extends JInternalFrame
 	{
 		storeHouseComboBox.setEnabled(true);
 	}
-	
-	
-//	class MyTableModel extends AbstractTableModel
-//	{
-//
-//		Vector<Goods> goodsVector=goodsVec;
-//		
-//		private String[] columnNames =
-//		{
-//				"商品编号", "商品名称", "产地", "规格","包装","生产批号",
-//                "批准文号","描述","价格","供应商编号"
-//		};
-//		
-//		public int getColumnCount()
-//		{
-//			return columnNames.length;
-//		}
-//
-//		public int getRowCount()
-//		{
-//			return goodsVector.size();
-//		}
-//
-//		public String getColumnName(int col)
-//		{
-//			return columnNames[col];
-//		}
-//
-//		public Object getValueAt(int row, int col)
-//		{
-//			Goods goods=goodsVector.get(row);
-//			return goods.getGoodsValue(col);
-//		}
-//
-//		@SuppressWarnings("unchecked")
-//		public Class getColumnClass(int c)
-//		{
-//			return getValueAt(0, c).getClass();
-//		}
-//
-//		public boolean isCellEditable(int row, int col)
-//		{
-//			return false;
-//		}		
-//	}
 	
 }
