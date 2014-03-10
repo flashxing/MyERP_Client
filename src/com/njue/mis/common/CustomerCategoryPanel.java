@@ -70,6 +70,15 @@ public class CustomerCategoryPanel extends JPanel{
 	}
 	
 	public List<Integer> getAllSubCateId(int cateId){
+		return CommonUtil.getAllSubCategory(categoryList, cateId);
+	}
+	public List<Integer> getSubCateId(int cateId){
 		return CommonUtil.getSubCategory(categoryList, cateId);
+	}
+	public Category getCategoryByCateId(int cateId){
+		return CommonUtil.getCategoryById(cateId, categoryList);
+	}
+	public boolean isChildren(Category category, int cateId){
+		return CommonUtil.isChildren(categoryList, category, cateId);
 	}
 }

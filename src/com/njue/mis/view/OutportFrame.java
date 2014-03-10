@@ -41,6 +41,7 @@ import com.njue.mis.interfaces.GoodsControllerInterface;
 import com.njue.mis.interfaces.PortControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Goods;
+import com.njue.mis.model.GoodsItem;
 import com.njue.mis.model.PortBack;
 import com.njue.mis.model.PortIn;
 import com.njue.mis.model.StoreHouse;
@@ -194,6 +195,7 @@ public class OutportFrame extends JInternalFrame
 			
 			public void actionPerformed(ActionEvent e)
 			{
+				List<GoodsItem> list = panelGoods.getGoodsItemList();
 				if(panelGoods.getGoodsItemList() == null || panelGoods.getGoodsItemList().size() <= 0){
 					CommonUtil.showError("请先选择一个商品");
 					return;
@@ -206,8 +208,12 @@ public class OutportFrame extends JInternalFrame
 					CommonUtil.showError("请选择一个客户");
 					return;
 				}
+				int number = 0;
+				for(GoodsItem goodsItem : list){
+					number += goodsItem.getNumber();
+				}
 				String customerId = customerButton.getCustomerId();				
-				PortBack portOut=new PortBack(inportID,"",shId,0,
+				PortBack portOut=new PortBack(inportID,"",shId,number,
 						                  panelGoods.getMoney(),inportTime,operator,commentField.getText(),customerId,panelGoods.getGoodsItemList());
 				
 				try {
@@ -216,7 +222,7 @@ public class OutportFrame extends JInternalFrame
 						JOptionPane.showMessageDialog(null,"退货单添加成功","警告",JOptionPane.WARNING_MESSAGE);
 						setEnableFalse();
 						initBase();
-						panelGoods.clearData();
+						panelGoods.clearData(ID_importtextField.getText());
 					}
 					else
 					{

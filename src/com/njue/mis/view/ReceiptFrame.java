@@ -46,9 +46,13 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
+import com.njue.mis.common.ButtonEditor;
+import com.njue.mis.common.ButtonRender;
 import com.njue.mis.common.CardItemButton;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.CustomerButton;
+import com.njue.mis.common.MoneyItemButton;
 import com.njue.mis.common.MyButtonEditor;
 import com.njue.mis.common.MyButtonRender;
 import com.njue.mis.common.ReceiptItemButton;
@@ -58,8 +62,10 @@ import com.njue.mis.interfaces.StockControllerInterface;
 import com.njue.mis.interfaces.StockObjectControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.CardItem;
+import com.njue.mis.model.Customer;
 import com.njue.mis.model.GiftIn;
 import com.njue.mis.model.Goods;
+import com.njue.mis.model.GoodsItem;
 import com.njue.mis.model.Receipt;
 import com.njue.mis.model.ReceiptIn;
 import com.njue.mis.model.ReceiptItem;
@@ -83,7 +89,6 @@ public class ReceiptFrame extends JInternalFrame
 	protected JTextField moneyField;
 	protected JTextField timeField;
 	protected JTextField operatorField;
-	protected CardItemButton cardItemButton;
 	protected JButton addButton;
 	protected JButton addItemButton;
 	protected JButton deleteItemButton;
@@ -94,8 +99,9 @@ public class ReceiptFrame extends JInternalFrame
 	protected JTextArea commentArea;
 	protected Date date;
 	protected ReceiptControllerInterface receiptService;
-	protected String[] columns = {"编号","条目","金额","备注"};
+	protected String[] columns = {"编号","账号","金额","备注"};
 	protected List<ReceiptItemDetail> receiptItemDetailList;
+	protected JButton cacelButton;
 	public ReceiptFrame(String frameName)
 	{
 		super(frameName,true,true,true,true);
@@ -122,6 +128,38 @@ public class ReceiptFrame extends JInternalFrame
 		formate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		timeField.setText(formate.format(date));
 	}
+	public void initWithReceipt(Receipt receipt){
+		idField.setText(receipt.getId());
+		try {
+			Customer customer = RemoteService.customerService.getCustomerInfo(receipt.getCustomerId());
+			if(null != customer){
+				customerButton.setText(customer.getName());
+			}
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		moneyField.setText(CommonUtil.formateDouble(receipt.getMoney())+"");
+		operatorField.setText(receipt.getOperator());
+		timeField.setText(receipt.getTime());
+		addButton.setVisible(false);
+		cacelButton.setVisible(false);
+		addItemButton.setVisible(false);
+		deleteItemButton.setVisible(false);
+		List<ReceiptItemDetail> list = receipt.getReceiptItemDetailList();
+		if(null==list || list.size() == 0){
+			return;
+		}
+		for(int i = 0; i< list.size(); i++){
+			int id = addRow();
+			ReceiptItemDetail itemDetail = list.get(i);
+			model.setValueAt(itemDetail.getId(), id, 0);
+			model.setValueAt(itemDetail.getMoney(), id, 2);
+			model.setValueAt(itemDetail.getComment(), id, 3);
+			CardItemButton itemButton = new CardItemButton(itemDetail.getCardName());
+			model.setValueAt(itemButton, id, 1);
+		}
+	}
 	public void reset(){
 		moneyField.setText("");
 		while(model.getRowCount()>0){
@@ -143,11 +181,6 @@ public class ReceiptFrame extends JInternalFrame
 			CommonUtil.showError("客户不能为空");
 			return null;
 		}
-		CardItem cardItem = cardItemButton.getCardItem();
-		if(cardItem == null){
-			CommonUtil.showError("账户不能为空");
-			return null;
-		}
 		String moneyString = moneyField.getText();
 		Double money = 0.0;
 
@@ -158,7 +191,11 @@ public class ReceiptFrame extends JInternalFrame
 		for(int i = 0; i < model.getRowCount(); i++){
 			int itemId = (Integer) model.getValueAt(i, 0);
 			System.out.println("itemId "+itemId);
-			ReceiptItem item = (ReceiptItem) model.getValueAt(i, 1);
+			CardItemButton itemButton = (CardItemButton) model.getValueAt(i, 1);
+			if(itemButton == null){
+				continue;
+			}
+			CardItem item = itemButton.getCardItem();
 			if(item == null){
 				continue;
 			}
@@ -173,12 +210,12 @@ public class ReceiptFrame extends JInternalFrame
 				continue;
 			}
 			String item_comment = (String) model.getValueAt(i, 3);
-			receiptItemDetailList.add(new ReceiptItemDetail(id, itemId, item.getItem(), item_money, item_comment));
+			receiptItemDetailList.add(new ReceiptItemDetail(id, itemId, item.getName(), item_money, item_comment));
 		}
 		if(type == 0){
-			return new ReceiptIn(id,customerId,money,time,operator, cardItem.getName(), "",receiptItemDetailList);
+			return new ReceiptIn(id,customerId,money,time,operator, "", "",receiptItemDetailList);
 		}else if(type == 1){
-			return new ReceiptOut(id, customerId, money, time, operator, cardItem.getName(), "",receiptItemDetailList);
+			return new ReceiptOut(id, customerId, money, time, operator, "", "",receiptItemDetailList);
 		}else{
 			return null;
 		}
@@ -196,8 +233,6 @@ public class ReceiptFrame extends JInternalFrame
 		JLabel timeLabel = new JLabel("时间");
 		timeField = new JTextField(12);
 		timeField.setEditable(false);
-		JLabel cardLabel = new JLabel("账号");
-		cardItemButton = new CardItemButton("。。。");
 		JLabel operatorLabel = new JLabel("操作员:");
 		operatorField = new JTextField(10);
 		operatorField.setText(MainFrame.username);
@@ -208,8 +243,6 @@ public class ReceiptFrame extends JInternalFrame
 		panelBaseInfo.add(customerButton);
 		panelBaseInfo.add(timeLabel);
 		panelBaseInfo.add(timeField);
-		panelBaseInfo.add(cardLabel);
-		panelBaseInfo.add(cardItemButton);
 		panelBaseInfo.add(operatorLabel);
 		panelBaseInfo.add(operatorField);
 		panelBaseInfo.setSize(new Dimension(screenSize.width * 2 / 3-60,
@@ -221,16 +254,17 @@ public class ReceiptFrame extends JInternalFrame
 		panel.add(panelBaseInfo, BorderLayout.NORTH);
 		
 		JPanel panelItem = new JPanel();
+		JPanel southPanel = new JPanel();
 		addItemButton = new JButton("添加条目");
 		addItemButton.addActionListener(new AddItemAction());
 		deleteItemButton = new JButton("删除条目");
 		deleteItemButton.addActionListener(new DeleteItemAction());
 		JLabel moneyLabel = new JLabel("总金额:");
 		moneyField = new JTextField(10);
-//		panelItem.add(moneyLabel);
-//		panelItem.add(moneyField);
-		panelItem.add(addItemButton);
-		panelItem.add(deleteItemButton);
+		southPanel.add(moneyLabel);
+		southPanel.add(moneyField);
+		southPanel.add(addItemButton);
+		southPanel.add(deleteItemButton);
 		model = new DefaultTableModel(columns, 0){
 			@Override
 			public boolean isCellEditable(int r,int c){
@@ -259,12 +293,13 @@ public class ReceiptFrame extends JInternalFrame
         scrollPane.setPreferredSize(new Dimension(screenSize.width * 3 / 5,
 				screenSize.height * 1/5));
         panelItem.add(scrollPane, BorderLayout.CENTER);
-			
+		panelItem.add(southPanel, BorderLayout.SOUTH);
+		
 		panel.add(panelItem, BorderLayout.CENTER);
 				
 		JPanel panelButton = new JPanel();
-		addButton = new JButton("添加");
-		JButton cacelButton = new JButton("取消");
+		addButton = new JButton("提交");
+		cacelButton = new JButton("取消");
 		cacelButton.addActionListener(new ActionListener(){
 
 			@Override
@@ -281,16 +316,13 @@ public class ReceiptFrame extends JInternalFrame
 		});
 		panelButton.add(addButton);
 		panelButton.add(cacelButton);
+				
+		JPanel southPanel1 = new JPanel(new BorderLayout());
 		
-		JPanel totalPanel = new JPanel();
-		totalPanel.add(moneyLabel);
-		totalPanel.add(moneyField);
+//		southPanel1.add(totalPanel, BorderLayout.NORTH);
+		southPanel1.add(panelButton, BorderLayout.SOUTH);
 		
-		JPanel southPanel = new JPanel(new BorderLayout());
-		southPanel.add(totalPanel, BorderLayout.NORTH);
-		southPanel.add(panelButton, BorderLayout.SOUTH);
-		
-		panel.add(southPanel, BorderLayout.SOUTH);
+		panel.add(southPanel1, BorderLayout.SOUTH);
 		return panel;
 	}
 	
@@ -318,10 +350,19 @@ public class ReceiptFrame extends JInternalFrame
 			Vector rows = new Vector();
 			rows.add(id);
 			model.addRow(rows);
-			table.getColumnModel().getColumn(1).setCellRenderer(new MyButtonRender());
-			table.getColumnModel().getColumn(1).setCellEditor(new MyButtonEditor());
+			table.getColumnModel().getColumn(1).setCellRenderer(new ButtonRender<CardItemButton>(CardItemButton.class));
+			table.getColumnModel().getColumn(1).setCellEditor(new ButtonEditor<CardItemButton>(CardItemButton.class));
 		}
 		
+	}
+	private int addRow(){
+		int id = model.getRowCount();
+		Vector rows = new Vector();
+		rows.add(id);
+		model.addRow(rows);
+		table.getColumnModel().getColumn(1).setCellRenderer(new ButtonRender<CardItemButton>(CardItemButton.class));
+		table.getColumnModel().getColumn(1).setCellEditor(new ButtonEditor<CardItemButton>(CardItemButton.class));
+		return id;
 	}
 	
 	private class DeleteItemAction implements ActionListener{

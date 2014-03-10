@@ -1,6 +1,7 @@
 package com.njue.mis.common;
 
 import java.awt.Component;
+import java.io.File;
 import java.io.ObjectInputStream.GetField;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
@@ -14,6 +15,7 @@ import java.util.Vector;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -24,6 +26,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
+
+import org.ietf.jgss.Oid;
 
 import com.njue.mis.model.Category;
 import com.njue.mis.model.Goods;
@@ -339,8 +343,14 @@ public class CommonUtil {
 		}
 		return false;
 	}
-	public static List<Integer> getSubCategory(List<Category> list, int cateId){
+	public static List<Integer> getAllSubCategory(List<Category> list, int cateId){
 		List<Integer> subCateList = new ArrayList<>();
+		if(cateId == 0){
+			for(Category category:list){
+				subCateList.add(category.getCate_id());
+			}
+			return subCateList;
+		}
 		Set<Integer> toAddSet = new HashSet<>();
 		Set<Integer> tmpSet = new HashSet<>();
 		toAddSet.add(cateId);
@@ -359,7 +369,30 @@ public class CommonUtil {
 		}
 		return subCateList;
 	}
-	private static Category getCategoryById(int cate_id, List<Category> list){
+	public static List<Integer> getSubCategory(List<Category> list, int cateId){
+		List<Integer> subCateList = new ArrayList<>();
+		for(Category category:list){
+			if(category.getPrefer_id() == cateId){
+				subCateList.add(category.getCate_id());
+			}
+		}
+		return subCateList;
+	}
+	public static boolean isChildren(List<Category> list, Category category, int cateId){
+		Category myCategory = getCategoryById(cateId, list);
+		System.out.println("category id is: "+myCategory.getCate_id()+" "+myCategory.getPrefer_id()+" "+category.getCate_id());
+		while(myCategory != null &&myCategory.getCate_id() != 0 && myCategory.getCate_id() != category.getCate_id()){
+			myCategory = getCategoryById(myCategory.getPrefer_id(), list);
+			if(myCategory != null){
+				System.out.println("category id is: "+myCategory.getCate_id()+" "+myCategory.getPrefer_id()+" "+category.getCate_id());
+			}
+		}
+		if(myCategory == null || myCategory.getCate_id() == 0){
+			return false;
+		}
+		return true;
+	}
+	public static Category getCategoryById(int cate_id, List<Category> list){
 		for(Category category:list){
 			if(category.getCate_id() == cate_id){
 				return category;
@@ -445,7 +478,27 @@ public class CommonUtil {
     public static double formateDouble(double number){
     	return Double.parseDouble(df.format(number));
     }
-	
+	public static String chooseExportPath(){
+		//弹出文件选择框
+		JFileChooser jfc = new JFileChooser();
+		jfc.setDialogTitle("请选择要导出目录");
+		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		int result = jfc.showOpenDialog(null);
+		File file = null;
+		if(JFileChooser.APPROVE_OPTION == result) {
+			file = jfc.getSelectedFile();
+			if(!file.isDirectory()) {
+				JOptionPane.showMessageDialog(null, "你选择的目录不存在");
+				return null;
+			}
+			String path = file.getAbsolutePath();
+			return path;
+		} else {
+			return null;
+		}
+	}
 //	public static void main(String[] args){
 //		Goods good1 = new Goods();
 //        good1.set_package("package");

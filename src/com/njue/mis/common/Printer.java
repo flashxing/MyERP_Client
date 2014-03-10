@@ -32,8 +32,10 @@ import org.jfree.ui.FloatDimension;
 import com.njue.mis.model.Customer;
 import com.njue.mis.model.Goods;
 import com.njue.mis.model.GoodsItem;
+import com.njue.mis.model.Sales;
 import com.njue.mis.model.SalesGoodsItem;
 import com.njue.mis.model.SalesIn;
+import com.sun.istack.internal.FinalArrayList;
 
 
 import bsh.This;
@@ -52,7 +54,7 @@ public class Printer implements ActionListener{
     private TableModel model;
     private String time = "";
     private String operator = "";
-    private SalesIn salesIn;
+    private final Sales salesIn = null;
     private String id = "";
     private String salesMan = "";
     private String customer = "";
@@ -62,6 +64,7 @@ public class Printer implements ActionListener{
     private String totalNumber = "";
     private String totalMoney = "";
     private String[] columns;
+    private boolean hasUnitPrice;
     
     /**
      * 处理窗口关闭事件
@@ -69,13 +72,6 @@ public class Printer implements ActionListener{
     protected static class CloseHandler extends WindowAdapter {
         public void windowClosing(final WindowEvent event) {
         }
-    }
-
-    /**
-     * 创建和显示简单的报表
-     */
-    public Printer() {
-
     }
     
     public void setData(String time, String operator){
@@ -100,13 +96,15 @@ public class Printer implements ActionListener{
         return result;
 
     }
-    public void init(SalesIn salesIn, List<Goods> goodsList, Customer customer, boolean hasUnitPrice){
+    public void init(final Sales salesIn,final List<Goods> goodsList,final Customer customer, boolean hasUnitPrice){
+    	System.out.println(goodsList.size()+" "+salesIn.getGoodsItemsList().size());
     	this.time = salesIn.getTime();
     	this.id = salesIn.getId();
     	this.salesMan = salesIn.getSalesMan();
     	this.customer = customer.getName();
     	this.operator = salesIn.getOperatePerson();
     	this.comment = salesIn.getComment();
+    	this.hasUnitPrice = hasUnitPrice;
     	int number = 0;
     	for(SalesGoodsItem goodsItem: salesIn.getGoodsItemsList()){
     		number += goodsItem.getNumber();
@@ -116,7 +114,7 @@ public class Printer implements ActionListener{
     	if (hasUnitPrice){
     		columns= new String[] {"编号","商品名称","商品型号","数量","单价","金额","备注"};
     	}else{
-    		columns = new String[]{"编号","商品名称","商品型号","数量","金额","备注"};
+    		columns = new String[]{"编号","商品名称","商品型号","数量","备注"};
     	}
     	final DefaultTableModel resul = new DefaultTableModel(columns, salesIn.getGoodsItemsList().size());
     	for(int row = 0; row<salesIn.getGoodsItemsList().size(); row++){
@@ -124,13 +122,16 @@ public class Printer implements ActionListener{
     		resul.setValueAt(goodsList.get(row).getGoodsName(), row, 1);
     		resul.setValueAt(goodsList.get(row).getDescription(), row, 2);
        		resul.setValueAt(salesIn.getGoodsItemsList().get(row).getNumber(), row, 3);
-       		resul.setValueAt(salesIn.getGoodsItemsList().get(row).getUnitPrice(), row, 4);
-       		resul.setValueAt(salesIn.getGoodsItemsList().get(row).getTotalPrice(), row, 5);
        		if (hasUnitPrice) {
-       			resul.setValueAt(salesIn.getGoodsItemsList().get(row).getComment(), row, 6);	
+           		resul.setValueAt(salesIn.getGoodsItemsList().get(row).getUnitPrice(), row, 4);
+           		resul.setValueAt(salesIn.getGoodsItemsList().get(row).getTotalPrice(), row, 5);
+           		resul.setValueAt(salesIn.getGoodsItemsList().get(row).getComment(), row, 6);	
+       		}else{	
+       			resul.setValueAt(salesIn.getGoodsItemsList().get(row).getComment(), row, 4);	       			
        		}
+       		
     	}
-    	footer_height = HEADER_HEIGHT+4*ROW_HEIGHT+(salesIn.getGoodsItemsList().size()+1)*(ROW_HEIGHT+5);
+    	footer_height = HEADER_HEIGHT+4*ROW_HEIGHT+(salesIn.getGoodsItemsList().size()+1)*(ROW_HEIGHT+5)+10;
     	this.model = resul;
     }
     
@@ -238,7 +239,9 @@ public class Printer implements ActionListener{
         header.addElement(distributorLabel.createElement());
         
         report.setPageHeader(header);
-        
+        float tmpWidth = pageWidth/(columns.length+1);
+        float[] dataWidth = {tmpWidth,tmpWidth,tmpWidth*2,tmpWidth,tmpWidth,tmpWidth,tmpWidth,tmpWidth};
+        float positionx = 0;
         if (columns != null && columns.length > 0) {
               report.getItemBand().addElement(StaticShapeElementFactory.createHorizontalLine(null, Color.BLACK, new BasicStroke(1), 0));    //绘制表格的横线
               //定义报表头
@@ -246,17 +249,15 @@ public class Printer implements ActionListener{
 
               for (int i = 0; i < columns.length; i++) {
                   //字段名元素
+            	  if(i > 0) positionx += dataWidth[i-1];
                   LabelElementFactory col = new LabelElementFactory();
                   col.setName(columns[i]);
                   col.setColor(Color.BLACK);
                   col.setHorizontalAlignment(ElementAlignment.CENTER);
                   col.setVerticalAlignment(ElementAlignment.MIDDLE);
                   col.setDynamicHeight(true);
-                  col.setAbsolutePosition(new Point2D.Float((pageWidth
-                         / (columns.length))
-                         * i, 0));
-                  col.setMinimumSize(new FloatDimension(pageWidth
-                         / (columns.length), ROW_HEIGHT));    //设置最小尺寸
+                  col.setAbsolutePosition(new Point2D.Float(positionx, 0));
+               	  col.setMinimumSize(new FloatDimension(dataWidth[i], ROW_HEIGHT));    //设置最小尺寸 
                   col.setBold(true);    //设置是否粗体显示
                   col.setText(columns[i]);
                   reportHeader.addElement(col.createElement());
@@ -270,11 +271,8 @@ public class Printer implements ActionListener{
                   data.setName(columns[i]);
      
                   data.setColor(Color.BLACK);
-                  data.setAbsolutePosition(new Point2D.Float((pageWidth
-                         / (columns.length))
-                         * i, 0));
-                  data.setMinimumSize(new FloatDimension(pageWidth
-                         / (columns.length), ROW_HEIGHT));
+                  data.setAbsolutePosition(new Point2D.Float(positionx, 0));
+                  data.setMinimumSize(new FloatDimension(dataWidth[i], ROW_HEIGHT)); 
                   data.setHorizontalAlignment(ElementAlignment.CENTER);
      
                   data.setVerticalAlignment(ElementAlignment.MIDDLE);
@@ -309,15 +307,17 @@ public class Printer implements ActionListener{
         totalNumberLabel.setDynamicHeight(true);    //设置是否动态调整高度（如果为true，当文本内容超出显示范围时高度自动加长）
         footer.addElement(totalNumberLabel.createElement());
         
-        LabelElementFactory totalMoneyLabel = new LabelElementFactory();
-        totalMoneyLabel.setText("实收金额："+totalMoney);    //设置文本内容
-        totalMoneyLabel.setColor(Color.BLACK);    //设置颜色
-        totalMoneyLabel.setAbsolutePosition(new Point2D.Float(pageWidth*1/2, 0));    //设置显示位置
-        totalMoneyLabel.setMinimumSize(new FloatDimension(pageWidth*1/2, ROW_HEIGHT));    //设置尺寸
-        totalMoneyLabel.setHorizontalAlignment(ElementAlignment.LEFT);
-        totalMoneyLabel.setVerticalAlignment(ElementAlignment.MIDDLE);
-        totalMoneyLabel.setDynamicHeight(true);    //设置是否动态调整高度（如果为true，当文本内容超出显示范围时高度自动加长）
-        footer.addElement(totalMoneyLabel.createElement());
+        if(hasUnitPrice){
+        	LabelElementFactory totalMoneyLabel = new LabelElementFactory();
+            totalMoneyLabel.setText("实收金额："+totalMoney);    //设置文本内容
+            totalMoneyLabel.setColor(Color.BLACK);    //设置颜色
+            totalMoneyLabel.setAbsolutePosition(new Point2D.Float(pageWidth*1/2, 0));    //设置显示位置
+            totalMoneyLabel.setMinimumSize(new FloatDimension(pageWidth*1/2, ROW_HEIGHT));    //设置尺寸
+            totalMoneyLabel.setHorizontalAlignment(ElementAlignment.LEFT);
+            totalMoneyLabel.setVerticalAlignment(ElementAlignment.MIDDLE);
+            totalMoneyLabel.setDynamicHeight(true);    //设置是否动态调整高度（如果为true，当文本内容超出显示范围时高度自动加长）
+            footer.addElement(totalMoneyLabel.createElement());
+        }
         
         LabelElementFactory confirmLabel = new LabelElementFactory();
         confirmLabel.setText("数量确认签字：");    //设置文本内容

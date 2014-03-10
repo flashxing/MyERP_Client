@@ -21,6 +21,7 @@ import com.njue.mis.interfaces.SetupCustomerControllerInterface;
 import com.njue.mis.interfaces.SetupGoodsControllerInterface;
 import com.njue.mis.interfaces.StockControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
+import com.njue.mis.interfaces.UserControllerInterface;
 
 public class RemoteService {
 	public static DiscountControllerInterface discountService;
@@ -39,6 +40,7 @@ public class RemoteService {
 	public static SetupGoodsControllerInterface setupGoodsService;
 	public static SetupCustomerControllerInterface setupCustomerService;
 	public static SetupControllerInterface setupService;
+	public static UserControllerInterface userServcie;
 	public static int load(){
 		try {
 			cardItemService = (CardItemControllerInterface) Naming.lookup(Configure.CardItemController);
@@ -57,6 +59,7 @@ public class RemoteService {
 			setupGoodsService = (SetupGoodsControllerInterface) Naming.lookup(Configure.SetupGoodsController);
 			setupCustomerService = (SetupCustomerControllerInterface) Naming.lookup(Configure.SetupCustomerController);
 			setupService = (SetupControllerInterface) Naming.lookup(Configure.SetupController);
+			userServcie = (UserControllerInterface) Naming.lookup(Configure.UserController);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

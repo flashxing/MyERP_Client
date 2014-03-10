@@ -18,7 +18,11 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
+import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.OperatorControllerInterface;
+import com.njue.mis.interfaces.UserControllerInterface;
+import com.njue.mis.model.User;
 
 public class ChangePasswordFrame extends JInternalFrame
 {
@@ -29,10 +33,11 @@ public class ChangePasswordFrame extends JInternalFrame
 	JPasswordField old_password, new_password, repassword;
 	JLabel empty1, empty2, empty3, empty4, empty5;
 	JButton change, cancel;
+	UserControllerInterface userService;
 	public ChangePasswordFrame()
 	{
 		super("更改密码", true, true, false, true);
-
+		userService = RemoteService.userServcie;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setBounds(screenSize.width / 8, screenSize.height / 12,
 				screenSize.width *2/5, screenSize.height *2/5);
@@ -83,18 +88,21 @@ public class ChangePasswordFrame extends JInternalFrame
 					else
 					{	
 						try {
-							OperatorControllerInterface operator = (OperatorControllerInterface) Naming.lookup(Configure.OperatorController);
-							if (oldPasswordString.equals(operator.getPassword(MainFrame.username)))
-							{
-								if (newPasswordString.equals(rePasswordString))
-								{
-									operator.modifyPassword(MainFrame.username, newPasswordString);
-									JOptionPane.showMessageDialog(null,
-											"恭喜你，密码已修改成功！", "消息",
-											JOptionPane.INFORMATION_MESSAGE);
-									dispose();
-								}
-								else
+							User user = userService.validUser(MainFrame.username, oldPasswordString);
+							if(user != null){
+								if(newPasswordString.equals(rePasswordString)){
+									user.setUserPW(rePasswordString);
+									if(userService.updateUser(user)){
+										JOptionPane.showMessageDialog(null,
+												"恭喜你，密码已修改成功！", "消息",
+												JOptionPane.INFORMATION_MESSAGE);
+										dispose();	
+									}else{
+										JOptionPane.showMessageDialog(null,
+												"密码修改失败！", "消息",
+												JOptionPane.INFORMATION_MESSAGE);
+									}
+								}else
 								{
 									JOptionPane.showMessageDialog(null,
 											"请输入相同新密码！", "警告",
@@ -106,16 +114,10 @@ public class ChangePasswordFrame extends JInternalFrame
 								JOptionPane.showMessageDialog(null, "旧密码不正确！",
 										"警告", JOptionPane.WARNING_MESSAGE);
 							}
-
-						} catch (MalformedURLException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
 						} catch (RemoteException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
-						} catch (NotBoundException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+							CommonUtil.showError("网络错误");
 						}
 					}
 			}

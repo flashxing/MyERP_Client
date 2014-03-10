@@ -12,8 +12,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
-import javax.jws.soap.SOAPBinding.Use;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -24,10 +22,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import com.njue.mis.client.Configure;
-import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
-import com.njue.mis.interfaces.CategoryControllerInterface;
-import com.njue.mis.interfaces.OperatorControllerInterface;
 import com.njue.mis.interfaces.UserControllerInterface;
 import com.njue.mis.model.User;
 
@@ -38,7 +33,6 @@ public class LoginFrame extends JFrame implements ActionListener
 	JPasswordField password;
 	JButton submit;
 	JButton cancel;
-
 	public LoginFrame()
 	{
 		super("进销存管理系统");
@@ -62,7 +56,6 @@ public class LoginFrame extends JFrame implements ActionListener
 		loginLayout();
 
 		this.setVisible(true);
-
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -130,8 +123,8 @@ public class LoginFrame extends JFrame implements ActionListener
 		password = new JPasswordField();
 		password.setColumns(10);
 		password.setEchoChar('*');
-		username.setText("test");
-		password.setText("123456");
+//		username.setText("周红梅");
+//		password.setText("970212");
 		panel_center = new JPanel();
 		panel_center.setLayout(new GridLayout(3, 1));
 		panel_south = new JPanel();

@@ -43,4 +43,8 @@ public interface SalesControllerInterface extends Remote{
 	 * 获取一个时间段的所有销售草稿
 	 */
 	public List<SalesIn> getAllSalesDraft(String begin, String end) throws Exception;
+	public List<Sales> searchSales(String begin, String end, 
+			String customerId, String goodsId,
+			String salesMan, int shId,
+			String operator, String comment, int type) throws RemoteException;
 }

@@ -12,9 +12,15 @@ import com.njue.mis.client.Configure;
 import com.njue.mis.client.RemoteService;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.CategoryControllerInterface;
+import com.njue.mis.interfaces.SalesControllerInterface;
 import com.njue.mis.interfaces.SetupControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
 import com.njue.mis.model.Category;
+import com.njue.mis.model.GoodsItem;
+import com.njue.mis.model.PortIn;
+import com.njue.mis.model.Sales;
+import com.njue.mis.model.SalesGoodsItem;
+import com.njue.mis.model.SalesIn;
 import com.njue.mis.model.StoreHouse;
 
 
@@ -57,6 +63,18 @@ public class MainAction
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+			}
+		};
+	}
+	public static ActionListener clickCardInfoManager()
+	{
+		return new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{	
+				CardFrame cardFrame = new CardFrame();
+				MainFrame.getMainFrame().getContentPane().add(cardFrame);
+				cardFrame.setVisible(true);		
 			}
 		};
 	}
@@ -490,7 +508,19 @@ public class MainAction
 			}
 		};
 	}
-	
+	//ÏúÊÛÃ÷Ï¸
+	public static ActionListener salesDetail(){
+		return new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				SalesDetailFrame salesDetailFrame = new SalesDetailFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						salesDetailFrame);
+				salesDetailFrame.setVisible(true);
+			}
+		};
+	}
 	public static ActionListener salesStatistics(){
 		return new ActionListener() {
 			
@@ -556,6 +586,17 @@ public class MainAction
 		};
 
 	}
+	public static ActionListener businessProcess() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				BusinessProcessFrame businessProcessFrame = new BusinessProcessFrame();
+				MainFrame.getMainFrame().getContentPane().add(
+						businessProcessFrame);
+				businessProcessFrame.setVisible(true);
+			}
+		};
+	}
 	
 	public static ActionListener setUpGoods() {
 		return new ActionListener() {
@@ -587,10 +628,60 @@ public class MainAction
 		return new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				CardItemFrame cardItemFrame = new CardItemFrame();
+				SetupCardItemFrame cardItemFrame = new SetupCardItemFrame();
 				MainFrame.getMainFrame().getContentPane().add(
 						cardItemFrame);
 				cardItemFrame.setVisible(true);
+			}
+		};
+
+	}
+	public static ActionListener debug() {
+		return new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				SalesControllerInterface salesService = RemoteService.salesService;
+				try {
+					List<Sales> list = salesService.getAllSalesIn();
+					for(Sales sales:list){
+						int number = 0;
+						for(SalesGoodsItem salesGoodsItem: sales.getGoodsItemsList()){
+							number+= salesGoodsItem.getNumber();
+						}
+						if(sales.getNumber() ==0 || sales.getNumber() != number){
+						sales.setNumber(number);
+						if(sales.getId().equals("PS20140303140447")){
+							System.out.println(number);
+						}
+						salesService.updateSales(sales);
+						}
+					}
+					List<SalesIn> dlist = salesService.getAllSalesDraft();
+					for(SalesIn sales:dlist){
+						int number = 0;
+						for(SalesGoodsItem salesGoodsItem: sales.getGoodsItemsList()){
+							number+= salesGoodsItem.getNumber();
+						}
+						if(sales.getNumber() ==0){
+						sales.setNumber(number);
+						salesService.updateSales(sales);
+						}
+					}
+					List<PortIn> list2 = RemoteService.portService.getAllPortIn();
+					for(PortIn portIn:list2){
+						int number =0;
+						for(GoodsItem goodsItem: portIn.getGoodsItemList()){
+							number+= goodsItem.getNumber();
+						}
+						if(portIn.getNumber() ==0){
+							portIn.setNumber(number);
+							RemoteService.portService.updatePort(portIn);
+						}
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		};
 

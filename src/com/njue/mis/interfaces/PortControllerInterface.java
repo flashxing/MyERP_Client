@@ -8,6 +8,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Vector;
 
+import com.njue.mis.model.Port;
 import com.njue.mis.model.PortBack;
 import com.njue.mis.model.PortIn;
 
@@ -52,4 +53,6 @@ public interface PortControllerInterface extends Remote
 	public Vector<PortBack> searchPortBackByTime(String beginTime, String endTime) throws RemoteException;
 
 	public List<List<PortIn>> searchPortInByTimeAndGoods(String beginTime, String endTime, String[] goodsIds) throws RemoteException;
+	public boolean updatePort(Port port) throws RemoteException;
+	public boolean deletePort(Port port) throws RemoteException;
 }

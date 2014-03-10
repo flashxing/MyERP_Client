@@ -37,6 +37,7 @@ public class CardItemButton extends JButton{
 	private static final long serialVersionUID = 8154707297417711740L;
 	private CardItem cardItem;
 	private CardItemChooser cardItemChooser;
+	private String text; //只在初始化传入字符串然后显示有作用，后面选择cardItem之后，text不做对应变化
 	public CardItemButton(String text){
 		super(text);
 		this.setSize(8, 20);
@@ -50,6 +51,7 @@ public class CardItemButton extends JButton{
                 cardItemChooser.showCustomerChooser(p);
             }
         });
+        this.text = text;
 	}
 	
 	public	CardItem getCardItem(){
@@ -204,6 +206,8 @@ public class CardItemButton extends JButton{
 	public String toString(){
 		if(this.cardItem!=null){
 			return this.cardItem.getName();
+		}else if(this.text != null){
+			return text;
 		}else{
 			return "";
 		}

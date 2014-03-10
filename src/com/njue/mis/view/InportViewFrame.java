@@ -7,6 +7,7 @@ import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -32,21 +33,24 @@ import javax.swing.table.AbstractTableModel;
 
 import com.lowagie.text.pdf.BidiOrder;
 import com.njue.mis.client.Configure;
+import com.njue.mis.client.RemoteService;
 import com.njue.mis.common.CommonFactory;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.CustomerButton;
 import com.njue.mis.common.GoodsButton;
 import com.njue.mis.common.GoodsItemPanel;
+import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.GoodsControllerInterface;
 import com.njue.mis.interfaces.PortControllerInterface;
 import com.njue.mis.interfaces.StoreHouseControllerInterface;
+import com.njue.mis.model.Customer;
 import com.njue.mis.model.Goods;
 import com.njue.mis.model.GoodsItem;
 import com.njue.mis.model.PortIn;
 import com.njue.mis.model.StoreHouse;
 
 
-public class InportFrame extends JInternalFrame
+public class InportViewFrame extends JInternalFrame
 {
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	
@@ -60,6 +64,7 @@ public class InportFrame extends JInternalFrame
 	private Vector<Goods> goodsVec;
 	private List<StoreHouse> storeHouseList;
 	private PortControllerInterface portInService;
+	private CustomerControllerInterface customerService;
 
     protected String[] goodsColumns={"商品编号","商品名称","商品描述"};
     protected String[] goodsFields={"productCode","goodsName","description"};
@@ -71,17 +76,43 @@ public class InportFrame extends JInternalFrame
 	private GoodsControllerInterface handler;
 	
 	private Goods selectedGoods;
-	
+	private PortIn portIn;
 	private GoodsItemPanel panelGoods;
-	public InportFrame()
+	private Customer customer;
+	private JButton deleteButton;
+	public InportViewFrame(PortIn portIn)
 	{
 		super("进货单",true,true,true,true);
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
 				screenSize.height * 4 / 7);
+		this.portIn = portIn;
 		this.getContentPane().add(importgoods());
+		initWithPortIn();
 	}
 
-	
+	public void initWithPortIn(){
+		if(null != portIn){
+			ID_importtextField.setText(portIn.getId());
+			importtimeField.setText(portIn.getTime());
+			operaterField.setText(portIn.getOperatePerson());
+			commentField.setText(portIn.getComment());
+			customerButton.setText(portIn.getCustomerId());
+			try {
+				customer = customerService.getCustomerInfo(portIn.getCustomerId());
+				customerButton.setText(customer.getName());
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			panelGoods.initWithGoodsList(portIn);
+		}
+		
+	}
+	public void setButtonVisible(boolean visible){
+		if(!visible){
+			deleteButton.setVisible(true);
+		}
+	}
 	public JPanel importgoods()
 	{
 		//get the goods data and storeHouse data
@@ -91,6 +122,7 @@ public class InportFrame extends JInternalFrame
 			StoreHouseControllerInterface storeHouseService = (StoreHouseControllerInterface) Naming.lookup(Configure.StoreHouseController);
 			storeHouseList = storeHouseService.getAll();
 			portInService = (PortControllerInterface) Naming.lookup(Configure.PortInController);
+			customerService = RemoteService.customerService;
 		} catch (MalformedURLException | RemoteException | NotBoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -192,58 +224,11 @@ public class InportFrame extends JInternalFrame
 		panelSearch.add(searchButton);
 		
 		JPanel panel4 = new JPanel();
-		
-		JButton inButton = new JButton("入库");
-		inButton.addActionListener(new ActionListener()
-		{
-			
-			public void actionPerformed(ActionEvent e)
-			{
-				List<GoodsItem> list = panelGoods.getGoodsItemList();
-				if(panelGoods.getGoodsItemList() == null || panelGoods.getGoodsItemList().size() <= 0){
-					CommonUtil.showError("请先选择一个商品");
-					return;
-				}
-				int number = 0;
-				for(GoodsItem goodsItem : list){
-					number += goodsItem.getNumber();
-				}
-				String inportID=ID_importtextField.getText();
-				int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-				String inportTime=importtimeField.getText();
-				String operator=operaterField.getText();
-				if(customerButton.getCustomer() == null){
-					CommonUtil.showError("请选择一个客户");
-					return;
-				}
-				String customerId = customerButton.getCustomerId();				
-				PortIn portIn=new PortIn(inportID,"",shId,number,
-						                  panelGoods.getMoney(),inportTime,operator,commentField.getText(),customerId,panelGoods.getGoodsItemList());
-				System.out.println(portIn);
-				try {
-					if (portInService.addPortIn(portIn)!=null)
-					{
-						JOptionPane.showMessageDialog(null,"入货单添加成功","警告",JOptionPane.WARNING_MESSAGE);
-						setEnableFalse();
-						initBase();
-						panelGoods.clearData(ID_importtextField.getText());
-					}
-					else
-					{
-						JOptionPane.showMessageDialog(null,"入货单添加失败，请按要求输入数据","警告",JOptionPane.WARNING_MESSAGE);	
-					}
-				} catch (HeadlessException | RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-					CommonUtil.showError("网络错误");
-				}
-				
-			}
-			
-		});
-		
+		deleteButton = new JButton("红冲");
+		deleteButton.addActionListener(new DeleteAction());
+		panel4.add(deleteButton);
 		setEnableFalse();  
-		panel4.add(inButton);
+//		panel4.add(inButton);
 		panel.add(northPanel,BorderLayout.NORTH);
 //		panel.add(panelSearch);
 		panel.add(panelGoods, BorderLayout.CENTER);
@@ -271,6 +256,32 @@ public class InportFrame extends JInternalFrame
 	private void setEnableTrue()
 	{
 		storeHouseComboBox.setEnabled(true);
+	}
+	private class DeleteAction implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			int confirm = JOptionPane.showConfirmDialog(null, "确认删除？");
+			if(JOptionPane.YES_OPTION != confirm){
+				return;
+			}
+			try {
+				if(!portInService.deletePort(portIn)){
+					CommonUtil.showError("删除失败");
+				}else{
+					CommonUtil.showError("删除成功");
+					setClosed(true);
+				}
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (PropertyVetoException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
 	}
 	
 }

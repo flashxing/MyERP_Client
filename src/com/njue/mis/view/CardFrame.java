@@ -24,7 +24,7 @@ import com.njue.mis.common.CommonUtil;
 import com.njue.mis.interfaces.CardItemControllerInterface;
 import com.njue.mis.model.CardItem;
 
-public class CardItemFrame  extends JInternalFrame{
+public class CardFrame  extends JInternalFrame{
 
 	/**
 	 * 
@@ -44,8 +44,8 @@ public class CardItemFrame  extends JInternalFrame{
     private JButton updateButton;
 	protected Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	private CardItem cardItem;
-	public CardItemFrame(){
-		super("账户期初建账",true,true,true,true);
+	public CardFrame(){
+		super("账户基本信息",true,true,true,true);
 		this.setBounds(0, 0, screenSize.width * 2 / 3,
 				screenSize.height * 4 / 7);
 		init();
@@ -113,12 +113,7 @@ public class CardItemFrame  extends JInternalFrame{
 					CommonUtil.showError("请输入银行和账号");
 					return;
 				}
-				double money = CommonUtil.getDoubleFromTextField(moneyField);
-				if(money < 0){
-					CommonUtil.showError("余额必须为数字");
-					return ;
-				}
-				CardItem cardItem = new CardItem(item, number, money);
+				CardItem cardItem = new CardItem(item, number, 0.0);
 				try {
 					if(cardItemService.addCardItem(cardItem) == null){
 						CommonUtil.showError("添加失败,请查看是否重复");
@@ -140,8 +135,8 @@ public class CardItemFrame  extends JInternalFrame{
         panel_input.add(itemField);
         panel_input.add(numberLabel);
         panel_input.add(numberField);
-        panel_input.add(moneyLabel);
-        panel_input.add(moneyField);
+//        panel_input.add(moneyLabel);
+//        panel_input.add(moneyField);
         panel_input.add(addButton);
         panel_input.add(deleteButton);
         panel_input.add(updateButton);

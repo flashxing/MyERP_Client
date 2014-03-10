@@ -10,11 +10,16 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonUtil;
+import com.njue.mis.common.CustomerUtil;
 import com.njue.mis.interfaces.ReceiptControllerInterface;
+import com.njue.mis.model.Customer;
+import com.njue.mis.model.Receipt;
 import com.njue.mis.model.ReceiptIn;
+import com.njue.mis.model.ReceiptShow;
 
 public class ReceiptInStatisticFrame extends StatisticFrame{
 	/**
@@ -23,8 +28,8 @@ public class ReceiptInStatisticFrame extends StatisticFrame{
 	private static final long serialVersionUID = 8462088879517881067L;
 	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	private List<ReceiptIn> receiptList = new ArrayList<ReceiptIn>();
-	protected String[] receiptColumns={"编号","客户","金额","操作人","时间"};
-	protected String[] receiptFields={"id","customerId","money","operator","time"};
+	protected String[] receiptColumns={"时间","客户","金额","操作人"};
+	protected String[] receiptFields={"time","customerName","money","operator"};
 	protected Object[] objList = {};
 
 	protected ReceiptControllerInterface receiptService;
@@ -55,7 +60,18 @@ public class ReceiptInStatisticFrame extends StatisticFrame{
 			try {
 				receiptList = receiptService.getAllReceiptInByTime(begin, end);
 				if(receiptList != null){
-					CommonUtil.updateJTable(table, receiptColumns, receiptList.toArray(), receiptFields);
+					List<String> customerIds = new ArrayList<>();
+					for(Receipt receipt : receiptList){
+						customerIds.add(receipt.getCustomerId());
+					}
+					Map<String, Customer> customerMap = CustomerUtil.getCustomers(customerIds);
+					List<ReceiptShow> receiptShows = new ArrayList<>();
+					for(Receipt receipt:receiptList){
+						if(customerMap.containsKey(receipt.getCustomerId())){
+							receiptShows.add(new ReceiptShow(receipt.getTime(), customerMap.get(receipt.getCustomerId()).getName(), receipt.getMoney(), receipt.getOperator()));
+						}
+					}
+					CommonUtil.updateJTable(table, receiptColumns, receiptShows.toArray(), receiptFields);
 					totalMoney.setText(""+totalMoney(receiptList));
 				}
 			} catch (RemoteException e) {

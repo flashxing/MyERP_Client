@@ -36,6 +36,8 @@ import com.njue.mis.client.Configure;
 import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.CustomerButton;
 import com.njue.mis.common.GoodsItemPanel;
+import com.njue.mis.common.PrintPanle;
+import com.njue.mis.common.Printer;
 import com.njue.mis.common.SalesGoodsItemPanel;
 import com.njue.mis.interfaces.CustomerControllerInterface;
 import com.njue.mis.interfaces.DiscountControllerInterface;
@@ -50,7 +52,6 @@ import com.njue.mis.model.SalesBack;
 import com.njue.mis.model.SalesGoodsItem;
 import com.njue.mis.model.SalesIn;
 import com.njue.mis.model.StoreHouse;
-
 
 public class SalesBackFrame extends JInternalFrame
 {
@@ -78,6 +79,8 @@ public class SalesBackFrame extends JInternalFrame
 	private Discount discount;
 	private JTextField timeField;
 	private Date date;
+	
+	private PrintPanle printPanle;
 	
 	public SalesBackFrame()
 	{
@@ -152,10 +155,14 @@ public class SalesBackFrame extends JInternalFrame
 		goodsPanel = new SalesGoodsItemPanel(salesIdField.getText());
 		initDiscount();
 		
+		printPanle = new PrintPanle();
+		printPanle.getPrintButton().addActionListener(new PrintAction());
+		
 		JPanel panelCommit = new JPanel();
 		JButton commitButton = new JButton("提交");
 		commitButton.addActionListener(new SalesAddListener());
 		panelCommit.add(commitButton);
+		panelCommit.add(printPanle);
 		
 		panel.add(panel5, BorderLayout.NORTH);
 		panel.add(goodsPanel, BorderLayout.CENTER);
@@ -164,25 +171,33 @@ public class SalesBackFrame extends JInternalFrame
 		return panel;
 	}
 
+	private SalesBack createSalesBack(){
+		Customer customer;
+		if((customer = customerButton.getCustomer())== null){
+			CommonUtil.showError("请选择一个客户");
+			return null;
+		}
+		List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(-1);
+		if(list == null|| list.size() == 0){
+			CommonUtil.showError("请选中一个商品");
+			return null;
+		}
+		String id = salesIdField.getText();
+		String time = timeField.getText();
+		String operator = operatorField.getText();
+		int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
+		SalesBack sales = new SalesBack(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,"",0,
+				goodsPanel.getMoney(), goodsPanel.getDecreaseMoney(),shId, 1, "", list);
+		return sales;
+	}
+	
 	private class SalesAddListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent arg0){
-			Customer customer;
-			if((customer = customerButton.getCustomer())== null){
-				CommonUtil.showError("请选择一个客户");
+			SalesBack sales = createSalesBack();
+			if(sales == null){
 				return;
 			}
-			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(-1);
-			if(list == null|| list.size() == 0){
-				CommonUtil.showError("请选中一个商品");
-				return;
-			}
-			String id = salesIdField.getText();
-			String time = timeField.getText();
-			String operator = operatorField.getText();
-			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-			SalesBack sales = new SalesBack(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,"",0,
-					goodsPanel.getMoney(), goodsPanel.getDecreaseMoney(),shId, 1, "", list);
 			try {
 				String result = salesHandler.addSalesBack(sales);
 				if(result == null){
@@ -190,12 +205,34 @@ public class SalesBackFrame extends JInternalFrame
 					return;
 				}
 				resetData();
-				goodsPanel.clearData();
+				goodsPanel.clearData(salesIdField.getText());
 			} catch (Exception e) {
 				e.printStackTrace();
 				CommonUtil.showError("网络错误");
 			}
 		}
+	}
+	private class PrintAction implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			Customer customer;
+			customer = customerButton.getCustomer();
+			SalesBack salesIn = createSalesBack();
+			if(salesIn == null || customer == null){
+				return;
+			}else{
+				Printer printer = new Printer();
+				if(printPanle.getPrintStyleComboBox().getSelectedIndex() == 0){
+					printer.init(salesIn, goodsPanel.getGoodsList(), customer, true);
+				}else{
+					printer.init(salesIn, goodsPanel.getGoodsList(), customer, false);
+				}
+				printer.print();
+			}
+		}
+		
 	}
 	
 }

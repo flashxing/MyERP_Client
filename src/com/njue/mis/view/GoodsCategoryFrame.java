@@ -12,6 +12,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -100,6 +101,10 @@ public class GoodsCategoryFrame extends CategoryFrame
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
+				int confirm = JOptionPane.showConfirmDialog(null, "确认删除？");
+				if(JOptionPane.YES_OPTION != confirm){
+					return;
+				}
 				int index = table.getSelectedRow();
 				if(index<0||goodsList==null||index>=goodsList.size()||goodsList.get(index)==null){
 					CommonUtil.showError("请选择一个商品!");
@@ -165,12 +170,37 @@ public class GoodsCategoryFrame extends CategoryFrame
         updateButton.addActionListener(new UpdateActionListener());
         removeButton.addActionListener(new DeleteActionListener());
         simpleTree.addMouseListener(new ClickNodeActionListener());
+        searchButton.addActionListener(new SearchAction());
+	}
+	class SearchAction implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			String goodsName = searchField.getText();
+			if(goodsName.length()<=0){
+				CommonUtil.showError("搜索关键词不能为空");
+				return;
+			}
+			try {
+				goodsList = goodsService.getAllGoodsByGoodsName(goodsName);
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			CommonUtil.updateJTable(table, objects, goodsList.toArray(), fieldsToShow);
+		}
+		
 	}
 	class DeleteActionListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			// TODO Auto-generated method stub
+			int confirm = JOptionPane.showConfirmDialog(null, "确认删除？");
+			if(JOptionPane.YES_OPTION != confirm){
+				return;
+			}
 			if((clickNode == null)|| (!clickNode.isLeaf())){
 				CommonUtil.showError("请选择一个没有下一级的分类");
 				return;

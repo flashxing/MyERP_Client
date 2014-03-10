@@ -14,8 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
@@ -199,6 +197,10 @@ public class SalesFrame extends JInternalFrame
 			CommonUtil.showError("请选中一个商品");
 			return null;
 		}
+		int number = 0;
+		for(SalesGoodsItem salesGoodsItem: list){
+			number += salesGoodsItem.getNumber();
+		}
 		String id = salesIdField.getText();
 		String time = timeField.getText();
 		String operator = operatorField.getText();
@@ -211,8 +213,8 @@ public class SalesFrame extends JInternalFrame
 		if(salesMan != null){
 			salesManName = salesMan.getName();
 		}
-		SalesIn sales = new SalesIn(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,commentField.getText(),0,
-				goodsPanel.getMoney(),goodsPanel.getDecreaseMoney(),shId, 1, salesManName, list);
+		SalesIn sales = new SalesIn(id,customer.getId(),"",number,CommonUtil.formateDouble(goodsPanel.getActualPrice()),time,operator,commentField.getText(),0,
+				CommonUtil.formateDouble(goodsPanel.getMoney()),goodsPanel.getDecreaseMoney(),shId, 1, salesManName, list);
 		return sales;
 	}
 	
@@ -230,7 +232,7 @@ public class SalesFrame extends JInternalFrame
 					return;
 				}
 				resetData();
-				goodsPanel.clearData();
+				goodsPanel.clearData(salesIdField.getText());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -248,25 +250,25 @@ public class SalesFrame extends JInternalFrame
 				return;
 			}
 			int shId=((StoreHouse) storeHouseComboBox.getSelectedItem()).getId();
-			List<SalesGoodsItem> list = goodsPanel.getGoodsItemList(shId);
+			List<SalesGoodsItem> list = goodsPanel.getDraftGoodsItemList(shId);
 			if(list == null|| list.size() == 0){
 				CommonUtil.showError("请选中一个商品");
 				return;
+			}		
+			int number = 0;
+			for(SalesGoodsItem salesGoodsItem: list){
+				number+=salesGoodsItem.getNumber();
 			}
 			String id = salesIdField.getText();
 			String time = timeField.getText();
-			String operator = operatorField.getText();
-			if(goodsPanel.getActualPrice()+customer.getCustomerMoney().getReceive()>customer.getMaxMoney()){
-				CommonUtil.showError("超过客户销售限额");
-				return;
-			}			
+			String operator = operatorField.getText();	
 			SalesMan salesMan = salesManButton.getSalesMan();
 			String salesManName = "";
 			if(salesMan != null){
 				salesManName = salesMan.getName();
 			}
-			SalesIn sales = new SalesIn(id,customer.getId(),"",0,goodsPanel.getActualPrice(),time,operator,"",0,
-					goodsPanel.getMoney(),goodsPanel.getDecreaseMoney(),shId, 0, salesManName, list);
+			SalesIn sales = new SalesIn(id,customer.getId(),"",number,CommonUtil.formateDouble(goodsPanel.getActualPrice()),time,operator,"",0,
+					CommonUtil.formateDouble(goodsPanel.getMoney()),goodsPanel.getDecreaseMoney(),shId, 0, salesManName, list);
 			try {
 				String result = salesHandler.addSalesIn(sales);
 				if(result == null){
@@ -274,7 +276,7 @@ public class SalesFrame extends JInternalFrame
 					return;
 				}
 				resetData();
-				goodsPanel.clearData();
+				goodsPanel.clearData(salesIdField.getText());
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

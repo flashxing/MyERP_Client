@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class ReceiptItemDetail implements Serializable {
 	private String receiptId;
-	private String receiptItem;
+	private String cardName;
 	private int id;
 	private double money;
 	private String comment;
@@ -13,18 +13,18 @@ public class ReceiptItemDetail implements Serializable {
 		
 	}
 	
-	public ReceiptItemDetail(String receiptId, int id, String receiptItem, double money, String comment){
+	public ReceiptItemDetail(String receiptId, int id, String cardName, double money, String comment){
 		this.receiptId = receiptId;
 		this.id = id;
-		this.receiptItem = receiptItem;
+		this.cardName = cardName;
 		this.money = money;
 		this.comment = comment;
 	}
-	public String getReceiptItem() {
-		return receiptItem;
+	public String getCardName() {
+		return cardName;
 	}
-	public void setReceiptItem(String receiptItem) {
-		this.receiptItem = receiptItem;
+	public void setCardName(String cardName) {
+		this.cardName = cardName;
 	}
 	public int getId() {
 		return id;
@@ -46,7 +46,7 @@ public class ReceiptItemDetail implements Serializable {
 	}
 
 	public ReceiptItemDetail clone(){
-		return new ReceiptItemDetail(receiptId, id, receiptItem, money, comment);
+		return new ReceiptItemDetail(receiptId, id, cardName, money, comment);
 	}
 
 	public String getReceiptId() {
@@ -55,5 +55,17 @@ public class ReceiptItemDetail implements Serializable {
 
 	public void setReceiptId(String receiptId) {
 		this.receiptId = receiptId;
+	}
+	@Override
+	public int hashCode(){
+		return (this.receiptId+this.id).hashCode();
+	}
+	@Override 
+	public boolean equals(Object object){
+		if(!(object instanceof ReceiptItemDetail)){
+			return false;
+		}
+		ReceiptItemDetail item = (ReceiptItemDetail) object;
+		return this.receiptId.equals(item.receiptId)&&this.id==item.id;
 	}
 }

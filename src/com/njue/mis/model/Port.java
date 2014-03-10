@@ -137,4 +137,17 @@ public class Port implements Serializable
 			number, price, time, operatePerson,
 			comment,customerId, list);
 	}
+	@Override
+	public String toString(){
+		return "id:"+id+
+				" goodsId:"+goodsId+
+				" storeHouseId:"+storeHouseId+
+				" number:"+number+
+				" price"+price+
+				" time:"+time+
+				" operatePerson:"+operatePerson+
+				" comment:"+comment+
+				" customerId:"+customerId+
+				" goodsItemList size:"+goodsItemList.size();
+	}
 }

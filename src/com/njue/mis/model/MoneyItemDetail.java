@@ -60,4 +60,16 @@ public class MoneyItemDetail implements Serializable {
 	public void setMoneyId(String moneyId) {
 		this.moneyId = moneyId;
 	}
+	@Override
+	public int hashCode(){
+		return (this.moneyId+this.id).hashCode();
+	}
+	@Override 
+	public boolean equals(Object object){
+		if(!(object instanceof MoneyItemDetail)){
+			return false;
+		}
+		MoneyItemDetail item = (MoneyItemDetail) object;
+		return this.moneyId.equals(item.moneyId)&&this.id==item.id;
+	}
 }

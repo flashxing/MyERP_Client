@@ -6,6 +6,7 @@ package com.njue.mis.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Vector;
 
 import com.njue.mis.model.Customer;
@@ -63,4 +64,5 @@ public interface CustomerControllerInterface extends Remote
      */
     public Customer getCustomerInfo(String id)throws RemoteException;
 	public Vector<Customer> getAllCustomerByCateId(int cateId) throws RemoteException;
+	public List<Customer> getAllCustomersByCateId(List<Integer> cateIdList) throws RemoteException;
 }

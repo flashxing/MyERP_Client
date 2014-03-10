@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Sales implements Serializable
+public class Sales implements Serializable
 {
 	/**
 	 * 
@@ -22,9 +22,9 @@ public abstract class Sales implements Serializable
 	public String operatePerson; //操作员  
 	public String comment;  //注释
 	public double discount;
-	public double totalPrice;
+	public double totalPrice; //总金额
 	public double decreasePrice;
-	public double price;  //价格
+	public double price;  //实收金额
 	public int shId;
 	public int isPublished;
 	public String salesMan;
@@ -80,6 +80,14 @@ public abstract class Sales implements Serializable
 		this.isPublished = isPublished;
 		this.salesMan = salesMan;
 		this.goodsItemsList = goodsItemList;
+	}
+	@Override
+	public String toString(){
+		return "id:"+id+
+			   " customerId:"+customerId+
+			   " goodsId:"+goodsId+
+			   " number:"+number+
+			   " item size:"+goodsItemsList.size();
 	}
 
 	public String getId()
@@ -177,5 +185,13 @@ public abstract class Sales implements Serializable
 	public void setSalesMan(String salesMan) {
 		this.salesMan = salesMan;
 	}
-	
+	public Sales clone(){
+		List<SalesGoodsItem> list = new ArrayList<SalesGoodsItem>();
+		for(SalesGoodsItem item: goodsItemsList){
+			list.add(item);
+		}
+		return new Sales(id, customerId, goodsId,
+			number, price, time, operatePerson,
+			comment, discount, totalPrice, decreasePrice, shId, isPublished, salesMan, list);
+	}
 }

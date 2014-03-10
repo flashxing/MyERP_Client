@@ -39,10 +39,12 @@ public class CategoryFrame extends JInternalFrame
     protected JButton addGoodsButton;
     protected JButton updateEntityButton;
     protected JButton deleteEntityButton;
+    protected JButton searchButton;
     protected DefaultMutableTreeNode clickNode;
     protected DefaultMutableTreeNode root;
     protected JTextField insertField;
     protected JTextField updateField;
+    protected JTextField searchField;
     protected JPanel panel;
     protected Container pane = this.getContentPane();
 	private JScrollPane goodScrollPane;
@@ -129,6 +131,12 @@ public class CategoryFrame extends JInternalFrame
         goodScrollPane.setViewportView(table);
         goodScrollPane.setPreferredSize(new Dimension(screenSize.width * 2 / 3,
 				screenSize.height * 1/8));
+        JPanel northPanel = new JPanel();
+        searchButton = new JButton("≤È—Ø");
+        searchField = new JTextField(10);
+        northPanel.add(searchField);
+        northPanel.add(searchButton);
+        this.getContentPane().add(northPanel, BorderLayout.NORTH);
         this.getContentPane().add(goodScrollPane, BorderLayout.CENTER);
         
         this.getContentPane().add( scrollPane,BorderLayout.WEST);

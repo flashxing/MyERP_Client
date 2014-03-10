@@ -8,7 +8,9 @@ import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -24,6 +26,8 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.jfree.report.JFreeReportBoot;
+
 import com.njue.mis.client.RemoteService;
 import com.njue.mis.interfaces.GoodsControllerInterface;
 import com.njue.mis.interfaces.StockControllerInterface;
@@ -32,6 +36,7 @@ import com.njue.mis.model.Goods;
 import com.njue.mis.model.SalesGoodsItem;
 import com.njue.mis.model.SalesIn;
 import com.njue.mis.model.Stock;
+import com.sun.org.apache.xml.internal.security.c14n.implementations.Canonicalizer11_OmitComments;
 
 public class SalesGoodsItemPanel extends JPanel{
 	private String portId;
@@ -46,7 +51,16 @@ public class SalesGoodsItemPanel extends JPanel{
 	protected JTable table;
 	protected DefaultTableModel model;
 	protected JScrollPane scrollPane;
-	protected String[] columns = {"编号","商品名称","数量","单价","总价","备注"};
+	protected String[] columns = {"编号","商品名称","商品型号","数量","单价","总价","备注"};
+	protected Map<String, Integer> map = new HashMap<String, Integer>(){{
+		put("id", 0);
+		put("goods", 1);
+		put("description", 2);
+		put("number", 3);
+		put("unitPrice", 4);
+		put("totalPrice", 5);
+		put("comment", 6);
+	}};
 	protected double money;
 	protected Discount discount;
 	private DecimalFormat df=new DecimalFormat(".##");
@@ -92,7 +106,7 @@ public class SalesGoodsItemPanel extends JPanel{
 		model = new DefaultTableModel(columns, 0){
 			@Override
 			public boolean isCellEditable(int r,int c){
-				if(c == 0|| c == 4){
+				if(c == map.get("id")|| c == map.get("description")){
 					return false;
 				}
 				return true;
@@ -105,24 +119,38 @@ public class SalesGoodsItemPanel extends JPanel{
 			public void tableChanged(TableModelEvent arg0) {
 				// TODO Auto-generated method stub
 				System.out.println("table changed");
+				int row = arg0.getFirstRow();
+				if(row<0 || row>= model.getRowCount()){
+					return;
+				}
+				Goods goods = (Goods) model.getValueAt(row, map.get("goods"));
+				if(goods == null){
+					return;
+				}
+				Object tmpDescription = model.getValueAt(row, map.get("description"));
+				if(tmpDescription == null || tmpDescription.toString().equals("") || !tmpDescription.toString().equals(goods.getDescription())){
+					model.setValueAt(goods.getDescription(), row, map.get("description"));
+				}
+				Object priceObject = model.getValueAt(row, map.get("unitPrice"));
+				double price = goods.getSalesPrice();
+//				if(priceObject != null&&!priceObject.equals("")){
+//					double tmpPrice = CommonUtil.formateDouble(Double.parseDouble(priceObject.toString()));
+//					if(tmpPrice == price){
+//						continue;	
+//					}
+//				}
+				if(discount != null){
+					price = price*discount.getDiscount(goods.getId());
+				}
+				if(arg0.getColumn() == map.get("goods")){
+					String st=df.format(price);
+					model.setValueAt(st, row, map.get("unitPrice"));
+				}
+				if(arg0.getColumn() == map.get("unitPrice")){
+					money = calTotalMoney();
+				}
 				money = calTotalMoney();
 				totalMoneyField.setText(""+money);
-				for(int i = 0; i < model.getRowCount(); ++i){
-					Goods goods = (Goods) model.getValueAt(i, 1);
-					if(goods == null){
-						continue;
-					}
-					Object priceObject = model.getValueAt(i, 3);
-					if(priceObject != null&&!priceObject.equals("")){
-						continue;
-					}
-					double price = goods.getSalesPrice();
-					if(discount != null){
-						price = price*discount.getDiscount(goods.getId());
-					}
-					String st=df.format(price);
-					model.setValueAt(st, i, 3);
-				}
 			}
 		});
 		CommonUtil.setDuiqi(table);
@@ -143,25 +171,28 @@ public class SalesGoodsItemPanel extends JPanel{
 		goodsItemList.clear();
 		goodsList.clear();
 		for(int i = 0; i < model.getRowCount(); i++){
-			int itemId = (Integer) model.getValueAt(i, 0);
-			Goods goods = (Goods) model.getValueAt(i, 1);
+			int itemId = (Integer) model.getValueAt(i, map.get("id"));
+			Goods goods = (Goods) model.getValueAt(i, map.get("goods"));
 			if(goods == null){
 				continue;
 			}
 			goodsList.add(goods);
-			int number;
-			double item_money;
+			int number = 0;
+			double item_money = 0;
 			try{
-				number = Integer.parseInt((String)model.getValueAt(i, 2));
+				number = Integer.parseInt((String)model.getValueAt(i, map.get("number")));
 				Stock stock = null;
 				if(shId > 0){ 
 					stock = stockService.getStock(shId, goods.getId());
-				}
-				if(stock != null && number > stock.getNumber()){
-					CommonUtil.showError("库存不足"+goods.getGoodsName());
+				}else{
+					CommonUtil.showError("请选择一个仓库");
 					return null;
 				}
-				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, 3))));
+				if(stock != null && number > stock.getNumber()){
+					CommonUtil.showError("库存不足"+goods.getGoodsName()+" 库存"+stock.getNumber());
+					return null;
+				}
+				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, map.get("unitPrice")))));
 				money+=number*item_money;
 				if(money<0||number<=0){
 					CommonUtil.showError("数量和单价必须为正");
@@ -170,9 +201,40 @@ public class SalesGoodsItemPanel extends JPanel{
 			}catch(Exception ex){
 				continue;
 			}
-			double total_price = number*item_money;
-			String item_comment = (String) model.getValueAt(i, 5);
-			goodsItemList.add(new SalesGoodsItem(itemId, portId, goods.getId(), number, item_money, total_price, item_comment));
+			double total_price = CommonUtil.formateDouble(number*item_money);
+			String item_comment = (String) model.getValueAt(i, map.get("comment"));
+			goodsItemList.add(new SalesGoodsItem(i, portId, goods.getId(), number, item_money, total_price, item_comment));
+		}
+		return this.goodsItemList;
+	}
+	public List<SalesGoodsItem> getDraftGoodsItemList(int shId){
+		money = 0;
+		this.shId = shId;
+		goodsItemList.clear();
+		goodsList.clear();
+		for(int i = 0; i < model.getRowCount(); i++){
+			int itemId = (Integer) model.getValueAt(i, map.get("id"));
+			Goods goods = (Goods) model.getValueAt(i, map.get("goods"));
+			if(goods == null){
+				continue;
+			}
+			goodsList.add(goods);
+			int number = 0;
+			double item_money = 0;
+			try{
+				number = Integer.parseInt((String)model.getValueAt(i, map.get("number")));
+				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, map.get("unitPrice")))));
+				money+=number*item_money;
+				if(money<0||number<=0){
+					CommonUtil.showError("数量和单价必须为正");
+					continue;
+				}
+			}catch(Exception ex){
+				continue;
+			}
+			double total_price = CommonUtil.formateDouble(number*item_money);
+			String item_comment = (String) model.getValueAt(i, map.get("comment"));
+			goodsItemList.add(new SalesGoodsItem(i, portId, goods.getId(), number, item_money, total_price, item_comment));
 		}
 		return this.goodsItemList;
 	}
@@ -218,8 +280,8 @@ public class SalesGoodsItemPanel extends JPanel{
 			/*
 			 * 不允许选中第二列去删除，会出错
 			 */
-			if(table.getSelectedColumn()!=0&&table.getSelectedColumn()!=2
-					&&table.getSelectedColumn()!=3&&table.getSelectedColumn()!=4&&table.getSelectedColumn()!=5){
+			if(table.getSelectedColumn()!=0&&table.getSelectedColumn()!=3
+					&&table.getSelectedColumn()!=4&&table.getSelectedColumn()!=5&&table.getSelectedColumn()!=6){
 				CommonUtil.showError("请选中一个条目");
 				return;
 			}
@@ -234,14 +296,14 @@ public class SalesGoodsItemPanel extends JPanel{
 	}
 	
 	private double calTotalMoney(){
-		money = 0;
+		money = 0.00;
 		for(int i = 0; i < model.getRowCount(); i++){
 			int number;
 			double item_money;
 			double total_price;
 			try{
-				number = Integer.parseInt((String)model.getValueAt(i, 2));
-				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, 3))));
+				number = Integer.parseInt(model.getValueAt(i, map.get("number")).toString());
+				item_money = Double.parseDouble(df.format(Double.parseDouble((String) model.getValueAt(i, map.get("unitPrice")))));
 				total_price = CommonUtil.formateDouble(number*item_money);
 				money+=total_price;
 				money=Double.parseDouble(df.format((money)));
@@ -250,13 +312,12 @@ public class SalesGoodsItemPanel extends JPanel{
 					CommonUtil.showError("数量和单价必须为正");
 					continue;
 				}
-				Object object = model.getValueAt(i, 4);
+				Object object = model.getValueAt(i, map.get("totalPrice"));
 				if(object!=null && total_price == Double.parseDouble((String) object)){
-					System.out.println(total_price+"***"+model.getValueAt(i, 4));
+					System.out.println(total_price+"***"+model.getValueAt(i, map.get("totalPrice")));
 					continue;
 				}	
-				model.setValueAt(total_price+"", i, 4);
-				
+				model.setValueAt(total_price+"", i, map.get("totalPrice"));
 			}catch(Exception ex){
 				ex.printStackTrace();
 				continue;
@@ -264,16 +325,18 @@ public class SalesGoodsItemPanel extends JPanel{
 //			String st=df.format(total_price);
 //			model.setValueAt(st, i, 4);
 		}
+		money = CommonUtil.formateDouble(money);
 		return money;
 	}
 	
-	public void clearData(){
+	public void clearData(String portId){
 		while(model.getRowCount()>0){
 			model.removeRow(0);
 		}
 		calTotalMoney();
 		totalMoneyField.setText(""+money);
 		decreasePriceField.setText("0");
+		this.portId = portId;
 	}
 	
 	public void setDiscount(Discount discount){
@@ -289,7 +352,7 @@ public class SalesGoodsItemPanel extends JPanel{
 		}catch(Exception exception){
 			actualPrice = 0;
 		}finally{
-			return actualPrice;
+			return CommonUtil.formateDouble(actualPrice);
 		}
 	}
 	
@@ -336,13 +399,18 @@ public class SalesGoodsItemPanel extends JPanel{
 		for(int i = 0; i< goodsItemList.size(); i++){
 			int id = addRow();
 			SalesGoodsItem goodsItem = goodsItemList.get(i);
-			model.setValueAt(goodsList.get(i), id, 1);
-			model.setValueAt(goodsItem.getNumber()+"", id, 2);
-			model.setValueAt(goodsItem.getUnitPrice()+"", id, 3);
-			model.setValueAt(goodsItem.getTotalPrice()+"", i, 4);
-			model.setValueAt(goodsItem.getComment()+"", id, 5);
+			model.setValueAt(goodsList.get(i), id, map.get("goods"));
+			model.setValueAt(goodsList.get(i).getDescription(), id, map.get("description"));
+			model.setValueAt(goodsItem.getNumber()+"", id, map.get("number"));
+			model.setValueAt(goodsItem.getUnitPrice()+"", id, map.get("unitPrice"));
+			model.setValueAt(goodsItem.getTotalPrice()+"", id, map.get("totalPrice"));
+			model.setValueAt(goodsItem.getComment()+"", id, map.get("comment"));
 		}
-		calTotalMoney();
+		money = salesIn.getTotalPrice();
+		totalMoneyField.setText(CommonUtil.formateDouble(money)+"");
+		decreasePriceField.setText(CommonUtil.formateDouble(salesIn.getDecreasePrice())+"");
+		actualPriceField.setText(CommonUtil.formateDouble(salesIn.getPrice())+"");
+//		calTotalMoney();
 //		totalMoneyField.setText(""+salesIn.getTotalPrice());
 //		decreasePriceField.setText(""+salesIn.getDecreasePrice());
 //		actualPriceField.setText(""+salesIn.getPrice());

@@ -73,4 +73,16 @@ public class SalesGoodsItem implements Serializable{
 	public SalesGoodsItem clone(){
 		return new SalesGoodsItem(id, portId, goodsId, number, unitPrice, totalPrice, comment);
 	}
+	@Override
+	public int hashCode(){
+		return (this.portId+this.id).hashCode();
+	}
+	@Override 
+	public boolean equals(Object object){
+		if(!(object instanceof SalesGoodsItem)){
+			return false;
+		}
+		SalesGoodsItem goodsItem = (SalesGoodsItem) object;
+		return this.portId.equals(goodsItem.portId)&&this.id==goodsItem.id;
+	}
 }

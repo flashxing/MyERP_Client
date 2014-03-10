@@ -49,6 +49,7 @@ import com.njue.mis.common.CommonUtil;
 import com.njue.mis.common.ButtonEditor;
 import com.njue.mis.common.ButtonRender;
 import com.njue.mis.common.CustomerButton;
+import com.njue.mis.common.MoneyItemPanel;
 import com.njue.mis.common.MyButtonEditor;
 import com.njue.mis.common.MyButtonRender;
 import com.njue.mis.common.ReceiptItemButton;
@@ -98,6 +99,7 @@ public class MoneyFrame extends JInternalFrame
 	protected MoneyControllerInterface moneyService;
 	protected String[] columns = {"编号","条目","金额","备注"};
 	protected List<MoneyItemDetail> moneyItemDetailList;
+	protected MoneyItemPanel moneyItemPanel;
 	public MoneyFrame()
 	{
 		super("钱流管理",true,true,true,true);
@@ -125,10 +127,7 @@ public class MoneyFrame extends JInternalFrame
 		timeField.setText(formate.format(date));
 	}
 	public void reset(){
-		moneyField.setText("");
-		while(model.getRowCount()>0){
-			model.removeRow(0);
-		}
+		moneyItemPanel.reset();
 		initBaseInfo();
 	}
 	/*
@@ -137,8 +136,6 @@ public class MoneyFrame extends JInternalFrame
 	 */
 	public Money createMoney(){
 		String id = idField.getText();
-		String moneyString = moneyField.getText();
-		Double money = 0.0;
 
 		String operator = operatorField.getText();
 		String time = timeField.getText();
@@ -147,34 +144,7 @@ public class MoneyFrame extends JInternalFrame
 			CommonUtil.showError("请选择一个账户");
 			return null;
 		}
-		moneyItemDetailList = new ArrayList<MoneyItemDetail>();
-		for(int i = 0; i < model.getRowCount(); i++){
-			int itemId = (Integer) model.getValueAt(i, 0);
-			System.out.println("itemId "+itemId);
-			MoneyItemButton itemButton;
-			itemButton = (MoneyItemButton) model.getValueAt(i, 1);
-			if(itemButton.getMoneyItem() == null){
-				continue;
-			}
-			MoneyItem item = itemButton.getMoneyItem();
-			if(item == null){
-				continue;
-			}
-			double item_money;
-			try{
-				item_money = Double.parseDouble((String) model.getValueAt(i, 2));
-				money+=item_money;
-				if(money<0){
-					CommonUtil.showError("金额必须为正");
-				}
-			}catch(Exception ex){
-				CommonUtil.showError("第几"+i+"行金额未输入,此行抛弃");
-				continue;
-			}
-			String item_comment = (String) model.getValueAt(i, 3);
-			moneyItemDetailList.add(new MoneyItemDetail(id, itemId, item.getName(), item_money, item_comment));
-		}
-		return new Money(id,money,time,operator,cardItem.getName(), moneyItemDetailList);
+		return moneyItemPanel.getMoney(id, operator, time, cardItem);
 	}
 	public JPanel importgoods()
 	{
@@ -209,42 +179,44 @@ public class MoneyFrame extends JInternalFrame
 		
 		panel.add(panelBaseInfo, BorderLayout.NORTH);
 		
-		JPanel panelItem = new JPanel();
-		addItemButton = new JButton("添加条目");
-		addItemButton.addActionListener(new AddItemAction());
-		deleteItemButton = new JButton("删除条目");
-		deleteItemButton.addActionListener(new DeleteItemAction());
-		JLabel moneyLabel = new JLabel("总金额:");
-		moneyField = new JTextField(10);
-//		panelItem.add(moneyLabel);
-//		panelItem.add(moneyField);
-		panelItem.add(addItemButton);
-		panelItem.add(deleteItemButton);
-		model = new DefaultTableModel(columns, 0){
-			@Override
-			public boolean isCellEditable(int r,int c){
-				if(c == 0){
-					return false;
-				}
-				return true;
-			}
-		};
-		table = new JTable(model);
-		CommonUtil.setDuiqi(table);
-		table.setModel(model);
-		table.setRowSelectionAllowed(false);
-		table.setPreferredScrollableViewportSize(new Dimension(screenSize.width * 3 / 5,
-				screenSize.height  / 5));
-        scrollPane = new JScrollPane();
-        scrollPane.setViewportView(table);
-        scrollPane.setPreferredSize(new Dimension(screenSize.width * 3 / 5,
-				screenSize.height * 1/5));
-        panelItem.add(scrollPane, BorderLayout.CENTER);
-			
-		panel.add(panelItem, BorderLayout.CENTER);
-				
+//		JPanel panelItem = new JPanel();
+//		addItemButton = new JButton("添加条目");
+//		addItemButton.addActionListener(new AddItemAction());
+//		deleteItemButton = new JButton("删除条目");
+//		deleteItemButton.addActionListener(new DeleteItemAction());
+//		JLabel moneyLabel = new JLabel("总金额:");
+//		moneyField = new JTextField(10);
+////		panelItem.add(moneyLabel);
+////		panelItem.add(moneyField);
+//		panelItem.add(addItemButton);
+//		panelItem.add(deleteItemButton);
+//		model = new DefaultTableModel(columns, 0){
+//			@Override
+//			public boolean isCellEditable(int r,int c){
+//				if(c == 0){
+//					return false;
+//				}
+//				return true;
+//			}
+//		};
+//		table = new JTable(model);
+//		CommonUtil.setDuiqi(table);
+//		table.setModel(model);
+//		table.setRowSelectionAllowed(false);
+//		table.setPreferredScrollableViewportSize(new Dimension(screenSize.width * 3 / 5,
+//				screenSize.height  / 5));
+//        scrollPane = new JScrollPane();
+//        scrollPane.setViewportView(table);
+//        scrollPane.setPreferredSize(new Dimension(screenSize.width * 3 / 5,
+//				screenSize.height * 1/5));
+//        panelItem.add(scrollPane, BorderLayout.CENTER);
+//			
+//		panel.add(panelItem, BorderLayout.CENTER);
+		
+		moneyItemPanel = new MoneyItemPanel();
+		panel.add(moneyItemPanel, BorderLayout.CENTER);
 		JPanel panelButton = new JPanel();
-		addButton = new JButton("添加");
+		addButton = new JButton("提交");
 		addButton.addActionListener(new AddAction());
 		JButton cacelButton = new JButton("取消");
 		cacelButton.addActionListener(new ActionListener(){
@@ -266,39 +238,6 @@ public class MoneyFrame extends JInternalFrame
 		
 		panel.add(panelButton, BorderLayout.SOUTH);
 		return panel;
-	}
-	private class AddItemAction implements ActionListener{
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			// TODO Auto-generated method stub
-			int id = model.getRowCount();
-			Vector rows = new Vector();
-			rows.add(id);
-			model.addRow(rows);
-			table.getColumnModel().getColumn(1).setCellRenderer(new ButtonRender<MoneyItemButton>(MoneyItemButton.class));
-			table.getColumnModel().getColumn(1).setCellEditor(new ButtonEditor<MoneyItemButton>(MoneyItemButton.class));
-		}
-		
-	}
-	
-	private class DeleteItemAction implements ActionListener{
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			// TODO Auto-generated method stub
-			if(table.getSelectedColumn()!=0&&table.getSelectedColumn()!=2&&table.getSelectedColumn()!=3){
-				CommonUtil.showError("请选中一个条目");
-				return;
-			}
-			int index = table.getSelectedRow();
-			if(!(index<table.getRowCount()&&index>=0)){
-				CommonUtil.showError("请先选择一个条目");
-				return;
-			}
-			model.removeRow(index);
-		}
-		
 	}
 	
 	private class AddAction implements ActionListener{

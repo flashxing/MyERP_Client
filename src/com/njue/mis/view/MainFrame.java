@@ -79,6 +79,9 @@ public class MainFrame extends JFrame
 			menuItem = new JMenuItem("商品信息管理");
 			menuItem.addActionListener(MainAction.clickGoodsInfoManager());
 			menu.add(menuItem);
+			menuItem = new JMenuItem("账户信息管理");
+			menuItem.addActionListener(MainAction.clickCardInfoManager());
+			menu.add(menuItem);
 			menuItem = new JMenuItem("折扣管理");
 			menuItem.addActionListener(MainAction.clickDiscountManager());
 			menu.add(menuItem);
@@ -130,6 +133,10 @@ public class MainFrame extends JFrame
 			menuItem = new JMenuItem("业务单稿");
 			menuItem.addActionListener(MainAction.salesDraft());
 			menu.add(menuItem);
+			
+//			menuItem = new JMenuItem("...");
+//			menuItem.addActionListener(MainAction.debug());
+//			menu.add(menuItem);
 		}
 		if(CommonUtil.hasPermisson(user, "查询管理")){
 			// Set up the select menu.
@@ -214,23 +221,28 @@ public class MainFrame extends JFrame
 		if(CommonUtil.hasPermisson(user, "统计报表")){
 			menu = new JMenu("统计报表");
 			menuBar.add(menu);
-			menuItem = new JMenuItem("收据报表");
-			menuItem.addActionListener(MainAction.receipInStatistics());
+//			menuItem = new JMenuItem("收据报表");
+//			menuItem.addActionListener(MainAction.receipInStatistics());
+//			menu.add(menuItem);
+//			
+//			menuItem = new JMenuItem("付款统计");
+//			menuItem.addActionListener(MainAction.receipOutStatistics());
+//			menu.add(menuItem);
+//			
+//			menuItem = new JMenuItem("销售统计");
+//			menuItem.addActionListener(MainAction.salesStatistics());
+//			menu.add(menuItem);
+//			
+//			menuItem = new JMenuItem("进货统计");
+//			menuItem.addActionListener(MainAction.inPortStatistics());
+//			menu.add(menuItem);
+			menuItem = new JMenuItem("销售明细");
+			menuItem.addActionListener(MainAction.salesDetail());
 			menu.add(menuItem);
-			
-			menuItem = new JMenuItem("付款统计");
-			menuItem.addActionListener(MainAction.receipOutStatistics());
-			menu.add(menuItem);
-			
-			menuItem = new JMenuItem("销售统计");
-			menuItem.addActionListener(MainAction.salesStatistics());
-			menu.add(menuItem);
-			
-			menuItem = new JMenuItem("进货统计");
-			menuItem.addActionListener(MainAction.inPortStatistics());
-			menu.add(menuItem);
-			
 			menuItem = new JMenuItem("经营历程");
+			menuItem.addActionListener(MainAction.businessProcess());
+			menu.add(menuItem);
+			menuItem = new JMenuItem("经营情况表");
 			menuItem.addActionListener(MainAction.allStatistics());
 			menu.add(menuItem);
 		}

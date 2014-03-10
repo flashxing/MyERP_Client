@@ -51,7 +51,7 @@ public class Stock implements Serializable{
 	
 	@Override
 	public String toString(){
-		return this.getGoodsId();
+		return "goodsId "+this.getGoodsId()+" time "+this.time+" number "+this.number;
 	}
 
 	public int getShId() {
@@ -72,5 +72,17 @@ public class Stock implements Serializable{
 	}
 	public void setPrice(double price) {
 		this.price = price;
+	}
+	@Override
+	public int hashCode(){
+		return (this.goodsId+this.time).hashCode();
+	}
+	@Override 
+	public boolean equals(Object object){
+		if(!(object instanceof Stock)){
+			return false;
+		}
+		Stock item = (Stock) object;
+		return this.goodsId.equals(item.goodsId)&&this.time==item.time;
 	}
 }

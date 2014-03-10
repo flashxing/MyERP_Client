@@ -48,4 +48,16 @@ public class SetupGoods implements Serializable{
 	public SetupGoods clone(){
 		return new SetupGoods(goodsId, shId, number);
 	}
+	@Override
+	public int hashCode(){
+		return (this.goodsId+this.shId).hashCode();
+	}
+	@Override 
+	public boolean equals(Object object){
+		if(!(object instanceof SetupGoods)){
+			return false;
+		}
+		SetupGoods item = (SetupGoods) object;
+		return this.goodsId.equals(item.goodsId)&&this.shId==item.shId;
+	}
 }
