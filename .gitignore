@@ -15,6 +15,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+lib/jxl*.jar
 
 # External tool builders
 .externalToolBuilders/
